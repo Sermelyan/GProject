@@ -5,7 +5,6 @@
 #ifndef INCLUDE_QUEU_HPP_
 #define INCLUDE_QUEU_HPP_
 
-#include <iostream>  // delete line and std::cout
 #include <vector>
 #include <mutex>
 
@@ -31,7 +30,7 @@ private:
     unsigned char RESIZE_CONST = 2;
 
     std::vector<T> * arr = nullptr;
-    size_t buffersize  = 0;
+    size_t buffersize = 0;
     size_t head = 0;
     size_t tail = 0;
     std::mutex GQueueMutex;
@@ -44,9 +43,8 @@ private:
 
 
 
-
 template <class T>
-GQueue<T>::GQueue(){
+GQueue<T>::GQueue() {
     arr = new std::vector<T>;
     arr->resize(BUFFER_START_SIZE);
     buffersize = BUFFER_START_SIZE;
@@ -57,7 +55,7 @@ GQueue<T>::GQueue(){
 
 
 template <class T>
-GQueue<T>::GQueue(const size_t &startSize){
+GQueue<T>::GQueue(const size_t &startSize) {
     arr = new std::vector<T>;
     arr->resize(startSize);
     buffersize = startSize;
@@ -68,14 +66,14 @@ GQueue<T>::GQueue(const size_t &startSize){
 
 
 template <class T>
-GQueue<T>::~GQueue(){
+GQueue<T>::~GQueue() {
     delete arr;
     //std::cout<<"destructor!\n";
 }
 
 
 template <class T>
-void GQueue<T>::push( const T &element){
+void GQueue<T>::push( const T &element) {
 
     GQueueMutex.lock();
 
@@ -91,9 +89,8 @@ void GQueue<T>::push( const T &element){
     GQueueMutex.unlock();
 }
 
-
 template <class T>
-T GQueue<T>::pop(){
+T GQueue<T>::pop() {
     GQueueMutex.lock();
 
     T &answer = arr->at(tail);
@@ -105,8 +102,9 @@ T GQueue<T>::pop(){
 }
 
 
+
 template <class T>
-bool GQueue<T>::isEmpty(){
+bool GQueue<T>::isEmpty() {
     GQueueMutex.lock();
 
     bool answer = head == tail;
@@ -117,16 +115,10 @@ bool GQueue<T>::isEmpty(){
 
 
 template <class T>
-void GQueue<T>::resize(){
+void GQueue<T>::resize() {
     //pass
 }
 
-
-// delete class
-class Foo{
-public:
-    void fooFun();
-};
 
 
 #endif  //  INCLUDE_QUEU_HPP_
