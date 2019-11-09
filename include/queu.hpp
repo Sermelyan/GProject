@@ -10,11 +10,10 @@
 
 
 template <class T>
-class GQueue{
-
-public:
+class GQueue {
+ public:
     GQueue();
-    GQueue(const size_t &startSize);
+    explicit GQueue(const size_t &startSize);
     ~GQueue();
     void push(const  T &element);
     T pop();
@@ -25,7 +24,7 @@ public:
     GQueue& operator=(const GQueue&) = delete;
     GQueue& operator=(const GQueue&&) = delete;
 
-private:
+ private:
     size_t BUFFER_START_SIZE = 8;
     unsigned char RESIZE_CONST = 2;
 
@@ -50,7 +49,6 @@ GQueue<T>::GQueue() {
     buffersize = BUFFER_START_SIZE;
     head = 0;
     tail = 0;
-    //std::cout<<"constructor STANDART START SIZE!\n";
 }
 
 
@@ -61,14 +59,12 @@ GQueue<T>::GQueue(const size_t &startSize) {
     buffersize = startSize;
     head = 0;
     tail = 0;
-    //std::cout<<"constructor!\n";
 }
 
 
 template <class T>
 GQueue<T>::~GQueue() {
     delete arr;
-    //std::cout<<"destructor!\n";
 }
 
 
@@ -77,7 +73,6 @@ void GQueue<T>::push( const T &element) {
 
     GQueueMutex.lock();
 
-    //std::cout<<"size:"<<head + 1<<" == "<< buffersize <<"\n";
     if (head + 1 == buffersize) {
         arr->resize(arr->size() * RESIZE_CONST);
         buffersize = arr->size();
@@ -95,7 +90,6 @@ T GQueue<T>::pop() {
 
     T &answer = arr->at(tail);
     tail++;
-    //std::cout<<"answer:"<<answer<<"\n";
 
     GQueueMutex.unlock();
     return answer;
@@ -116,7 +110,7 @@ bool GQueue<T>::isEmpty() {
 
 template <class T>
 void GQueue<T>::resize() {
-    //pass
+    //  pass
 }
 
 
