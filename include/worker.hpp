@@ -1,3 +1,7 @@
+/*
+ * Copyright 2019 S4lly
+ */
+
 #ifndef INCLUDE_WORKER_HPP_
 #define INCLUDE_WORKER_HPP_
 

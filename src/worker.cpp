@@ -1,3 +1,7 @@
+/*
+ * Copyright 2019 S4lly
+ */
+
 #include "worker.hpp"
 
 //Worker::Worker()
