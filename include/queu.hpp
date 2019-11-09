@@ -33,8 +33,7 @@ class GQueue {
     size_t head = 0;
     size_t tail = 0;
     std::mutex GQueueMutex;
-
-    void resize();
+    
 };
 
 // END OF HEADER FILE!
@@ -104,12 +103,6 @@ bool GQueue<T>::isEmpty() {
 
     GQueueMutex.unlock();
     return answer;
-}
-
-
-template <class T>
-void GQueue<T>::resize() {
-    //  pass
 }
 
 
