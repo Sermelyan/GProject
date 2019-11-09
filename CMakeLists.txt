@@ -27,7 +27,17 @@ add_library(queu STATIC src/queu.cpp)
 
 add_library(server STATIC src/server.cpp)
 
-add_library(worker STATIC src/worker.cpp)
 
-add_executable(test test/test.cpp)
-target_link_libraries(test gtest)
+add_library(worker STATIC src/worker.cpp )
+#find_package(SQLite3 REQUIRED)
+#if (NOT SQLITE3_FOUND)
+#    message(SEND_ERROR "Failed to find SQLite3")
+#        return()
+#    else()
+#    include_directories(${SQLITE3_INCLUDE_DIRS})
+#    target_link_libraries (worker ${SQLITE3_LIBRARIES})
+#endif (SQLITE3_FOUND)
+
+
+add_executable(test test/test.cpp src/worker.cpp)
+target_link_libraries(test gtest gmock)
