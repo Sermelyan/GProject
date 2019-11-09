@@ -6,21 +6,20 @@
 #include <map>
 #include <queue>
 #include <list>
-//#include <sqlite3.h>
+// #include <sqlite3.h>
 
-struct Limit
-{
+struct Limit {
     double Point[4];
     int Time;
 };
 
 class Data_in
 {
-private:
+ private:
     std::vector<std::string> Filters;
     int User_id;
     Limit limits;
-public:
+ public:
     Data_in();
     Data_in(const std::vector<std::string> &f, const int id, const Limit l);
     ~Data_in();
@@ -31,9 +30,7 @@ public:
     Data_in operator=(const Data_in &Reight);
 };
 
-bool operator== (const Data_in left, const Data_in right);//{
-//    return true;
-//}
+bool operator== (const Data_in left, const Data_in right);
 
 class Data_out
 {
@@ -64,17 +61,16 @@ private:
     Data_in request;
     std::queue<Data_out> *Out;
     std::queue<Data_in> *In;
-
-//    sqlite3 *Connection;
-//    GQueue &In;
-//    GQueue &Out;
+    // sqlite3 *Connection;
+    // GQueue &In;
+    // GQueue &Out;
 public:
-//    Worker();
+    Worker();
     Worker(std::queue<Data_in> *in, std::queue<Data_out> *out){
         In = in;
         Out = out;
     }
-//    Worker(sqlite3 *conect, GQueue &In,GQueue &In);
+    // Worker(sqlite3 *conect, GQueue &In,GQueue &In);
     ~Worker();
     Data_in GetFromQueu();
     void SendToQueu(const Data_out value);
