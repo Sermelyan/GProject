@@ -29,11 +29,11 @@ class GQueue {
     unsigned char RESIZE_CONST = 2;
 
     std::vector<T> * arr = nullptr;
-    size_t buffersize = 0;
+    size_t bufferSize = 0;
     size_t head = 0;
     size_t tail = 0;
     std::mutex GQueueMutex;
-    
+
 };
 
 // END OF HEADER FILE!
@@ -45,7 +45,7 @@ template <class T>
 GQueue<T>::GQueue() {
     arr = new std::vector<T>;
     arr->resize(BUFFER_START_SIZE);
-    buffersize = BUFFER_START_SIZE;
+    bufferSize = BUFFER_START_SIZE;
     head = 0;
     tail = 0;
 }
@@ -55,7 +55,7 @@ template <class T>
 GQueue<T>::GQueue(const size_t &startSize) {
     arr = new std::vector<T>;
     arr->resize(startSize);
-    buffersize = startSize;
+    bufferSize = startSize;
     head = 0;
     tail = 0;
 }
@@ -71,9 +71,9 @@ template <class T>
 void GQueue<T>::push(const T &element) {
     GQueueMutex.lock();
 
-    if (head + 1 == buffersize) {
+    if (head + 1 == bufferSize) {
         arr->resize(arr->size() * RESIZE_CONST);
-        buffersize = arr->size();
+        bufferSize = arr->size();
     }
 
     arr->at(head) = element;
