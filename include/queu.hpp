@@ -69,8 +69,7 @@ GQueue<T>::~GQueue() {
 
 
 template <class T>
-void GQueue<T>::push( const T &element) {
-
+void GQueue<T>::push(const T &element) {
     GQueueMutex.lock();
 
     if (head + 1 == buffersize) {
