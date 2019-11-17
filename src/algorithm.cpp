@@ -5,7 +5,7 @@
 #include "algorithm.hpp"
 
 Algorithm::Algorithm(std::vector<edge> edges, std::vector<weight> weights) {
-
+1;
     assert(edges.size() == weights.size());
 
     edgeSize = edges.size();
@@ -24,11 +24,11 @@ Algorithm::~Algorithm() {
 
 void Algorithm::MakeGraph() {
     myGraph = graph_t(edgeArr, edgeArr + edgeSize, weightArr, edgeSize);
-    boost::property_map<graph_t, boost::edge_weight_t>::type weightGraph = get(boost::edge_weight, myGraph);
+    boost::property_map<graph_t, boost::edge_weight_t>::type weightGraph =
+            get(boost::edge_weight, myGraph);
 }
 
 std::vector<Algorithm::dotId> Algorithm::CalcRoute(dotId A, dotId B) {
-
     MakeGraph();
 
     // вектор для пройденных путей
@@ -41,22 +41,23 @@ std::vector<Algorithm::dotId> Algorithm::CalcRoute(dotId A, dotId B) {
     vertex_descriptor pointB = vertex(B, myGraph);
 
     boost::dijkstra_shortest_paths(myGraph, pointA,
-                                   boost::predecessor_map(&pastWay[0]).distance_map(&rootDist[0]));
+            boost::predecessor_map(&pastWay[0]).distance_map(&rootDist[0]));
 
     std::vector<boost::graph_traits<graph_t>::vertex_descriptor> path;
     boost::graph_traits<graph_t>::vertex_descriptor current = pointB;
 
-    // идем в обратную сторону и запоминаем путь
-    while(current != pointA) {
+    //  идем в обратную сторону и запоминаем путь
+    while( current != pointA ) {
         path.push_back(current);
         current = pastWay[current];
     }
-    path.push_back(pointA); // добавляем в конец точку с которой начинали
+    path.push_back(pointA); //  добавляем в конец точку с которой начинали
 
     std::vector<dotId> answer;
 
-    // в ответ записываем в правильном порядке
-    std::vector<boost::graph_traits<graph_t>::vertex_descriptor >::reverse_iterator iter;
+    //  в ответ записываем в правильном порядке
+    std::vector<boost::graph_traits<graph_t>::vertex_descriptor >::
+            reverse_iterator iter;
     for (iter = path.rbegin(); iter != path.rend(); ++iter)
         answer.push_back(*iter);
 
