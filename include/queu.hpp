@@ -11,7 +11,7 @@
 template <class T>
 class GQueue {
  public:
-    GQueue()=delete;
+    GQueue() = delete;
     explicit GQueue(const T &element404);
     ~GQueue();
     void push(const  T &element);
@@ -35,7 +35,7 @@ GQueue<T>::~GQueue() {
 }
 
 template <class T>
-GQueue<T>::GQueue(const T &element404){
+GQueue<T>::GQueue(const T &element404) {
     queue = new std::queue<T>;
     this->element404 =  element404;
 }
