@@ -1,23 +1,21 @@
 /*
- * Copyright 2019 <Copyright Owner>
+ * Copyright 2019 <Alex>
  */
 
 #ifndef INCLUDE_QUEU_HPP_
 #define INCLUDE_QUEU_HPP_
 
-#include <vector>
+#include <queue>
 #include <mutex>
-
 
 template <class T>
 class GQueue {
  public:
-    GQueue();
-    explicit GQueue(const size_t &startSize);
+    GQueue()=delete;
+    explicit GQueue(const T &element404);
     ~GQueue();
     void push(const  T &element);
-    T pop();
-    bool isEmpty();
+    T  popIfNotEmpty();
 
     GQueue(const GQueue&) = delete;
     GQueue(const GQueue&&) = delete;
@@ -25,86 +23,40 @@ class GQueue {
     GQueue& operator=(const GQueue&&) = delete;
 
  private:
-    size_t BUFFER_START_SIZE = 8;
-    unsigned char RESIZE_CONST = 2;
-
-    std::vector<T> * arr = nullptr;
-    size_t bufferSize = 0;
-    size_t head = 0;
-    size_t tail = 0;
+    T element404;
+    std::queue<T> * queue;
     std::mutex GQueueMutex;
-
 };
-
-// END OF HEADER FILE!
-// below realization ONLY for tests
-
-
-
-template <class T>
-GQueue<T>::GQueue() {
-    arr = new std::vector<T>;
-    arr->resize(BUFFER_START_SIZE);
-    bufferSize = BUFFER_START_SIZE;
-    head = 0;
-    tail = 0;
-}
-
-
-template <class T>
-GQueue<T>::GQueue(const size_t &startSize) {
-    arr = new std::vector<T>;
-    arr->resize(startSize);
-    bufferSize = startSize;
-    head = 0;
-    tail = 0;
-}
 
 
 template <class T>
 GQueue<T>::~GQueue() {
-    delete arr;
+    delete queue;
 }
 
+template <class T>
+GQueue<T>::GQueue(const T &element404){
+    queue = new std::queue<T>;
+    this->element404 =  element404;
+}
 
 template <class T>
 void GQueue<T>::push(const T &element) {
     GQueueMutex.lock();
+    queue->push(element);
+    GQueueMutex.unlock();
+}
 
-    if (head + 1 == bufferSize) {
-        arr->resize(arr->size() * RESIZE_CONST);
-        bufferSize = arr->size();
+template <class T>
+T GQueue<T>::popIfNotEmpty() {
+    GQueueMutex.lock();
+    T answer = this->element404;
+    if (!queue->empty()) {
+        answer = queue->front();
+        queue->pop();
     }
-
-    arr->at(head) = element;
-    head++;
-
-    GQueueMutex.unlock();
-}
-
-template <class T>
-T GQueue<T>::pop() {
-    GQueueMutex.lock();
-
-    T &answer = arr->at(tail);
-    tail++;
-
     GQueueMutex.unlock();
     return answer;
 }
-
-
-
-template <class T>
-bool GQueue<T>::isEmpty() {
-    GQueueMutex.lock();
-
-    bool answer = head == tail;
-
-    GQueueMutex.unlock();
-    return answer;
-}
-
-
 
 #endif  //  INCLUDE_QUEU_HPP_

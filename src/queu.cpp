@@ -5,7 +5,7 @@
 
 #include "queu.hpp"
 
-
+// template realization in header
 
 
 
