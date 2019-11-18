@@ -29,7 +29,7 @@ add_library(server STATIC src/server.cpp)
 
 
 add_library(worker STATIC src/worker.cpp )
-
+target_link_libraries(worker gtest gmock)
 
 add_executable(test test/test.cpp src/worker.cpp)
 target_link_libraries(test gtest gmock)

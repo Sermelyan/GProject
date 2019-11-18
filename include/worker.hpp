@@ -8,7 +8,7 @@
 #include <list>
 //#include <gmock/gmock-spec-builders.h>
 //#include <sqlite3.h>
-//#include "gmock/gmock.h"
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "queu.hpp"
 
