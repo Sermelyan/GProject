@@ -1,54 +1,48 @@
-/*
- * Copyright 2019 S4lly
- */
-
 #include "worker.hpp"
+#include "queu.hpp"
 
 //Worker::Worker()
 //{
 //
 //}
 
-//Worker::Worker(std::queue<Data_in> &in, std::queue<Data_out> &out);
-//{
-//
-//}
-
-Worker::~Worker()
+Worker::Worker(Queue &in, Queue &out, Sqlite &DataBase):In(in), Out(out), DB(DataBase)
 {
+}
+
+Worker::~Worker(){
 
 }
 
-Data_in Worker::GetFromQueu()
-{
+Data_in Worker::GetFromQueueIn(){
     Data_in a;
     return a;
 }
 
-void  Worker::SendToQueu(const Data_out value)
-{
+void  Worker::SendToQueueOut(const Data_out &value){
 
 }
-void Worker::GetDotsFromDB(std::vector<std::pair<double, double>> &points, Data_in value)
-{
+void Worker::GetDotsFromDB(const Data_in &value, std::vector<Point> &points){
 
 }
 
-void Worker::GetRibsFromAPI(std::vector<std::pair<double, double>> &points, std::vector<std::vector<double >> &ribs)
+void Worker::GetRibsFromAPI(const std::vector<Point> &points, std::vector<std::vector<double >> &ribs){
+
+}
+
+void Worker::GetRoute(const std::vector<Point> &points, const std::vector<std::vector<int>> &ribs,
+                      std::list<Point> &res){
+
+}
+
+void Worker::WorkerProcess()
 {
 
 }
 
-void Worker::GetRoute(std::vector<std::pair<double, double>> &points, std::vector<std::vector<int>> &ribs, std::list<std::pair<double, double>> res)
-{
+void Worker::Kill() {
 
 }
-
-void Worker::Check()
-{
-
-}
-
 
 Data_in::Data_in()
 {
@@ -102,6 +96,13 @@ bool operator==(const Data_in left, const Data_in right){
     return true;
 }
 
+bool operator==(const Point left, const Point right){
+//    if(left.X == right.X && left.Y == right.Y){
+//        return true;
+//    }
+    return true;
+}
+
 bool operator==(const Data_out left, const Data_out right){
     return true;
 }
@@ -111,12 +112,13 @@ Data_out::Data_out()
 
 }
 
-Data_out::Data_out(const std::vector<std::pair<double, double >> &point, const int id, const int time)
+Data_out::Data_out(const std::vector<Point> &point, const int id, const int time)
 {
     this->Points.clear();
-    for(int i = 0; i < point.size(); ++i){
-        this->Points.push_back(point[i]);
-    }
+//    for(int i = 0; i < point.size(); ++i){
+//        Points.push_back(point[i].X);
+//        Points[i].Y.push_back(point[i].Y);
+//    }
     this->User_id = id;
     this->Time = time;
 }
@@ -156,7 +158,7 @@ void Data_out::Set_Points(std::vector<std::pair<double, double >> &point)
 
 }
 
-Data_out Data_out::operator=(const Data_out &Reight)
+Data_out Data_out::operator=(testing::internal::OnCallSpec<Data_out(void)> Reight)
 {
     Data_out a;
     return a;
