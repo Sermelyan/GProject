@@ -6,10 +6,10 @@
 #include <map>
 #include <queue>
 #include <list>
-#include <gmock/gmock-spec-builders.h>
+//#include <gmock/gmock-spec-builders.h>
 //#include <sqlite3.h>
 //#include "gmock/gmock.h"
-//#include "gtest/gtest.h"
+#include "gtest/gtest.h"
 #include "queu.hpp"
 
 struct Point
@@ -62,7 +62,7 @@ public:
     void Set_Id(const int id);
     void Set_Time(const int time);
     void Set_Points(std::vector<std::pair<double, double >> &filtr);
-    Data_out operator=(testing::internal::OnCallSpec<Data_out(void)> Reight);
+//    Data_out operator=(testing::internal::OnCallSpec<Data_out(void)> Reight);
 
     void Get_Points(std::vector<std::pair<double, double>> point) const;
 };
