@@ -158,11 +158,11 @@ void Data_out::Set_Points(std::vector<std::pair<double, double >> &point)
 
 }
 
-//Data_out Data_out::operator=(testing::internal::OnCallSpec<Data_out(void)> Reight)
-//{
-//    Data_out a;
-//    return a;
-//}
+Data_out Data_out::operator=(testing::internal::OnCallSpec<Data_out(void)> Reight)
+{
+    Data_out a;
+    return a;
+}
 
 void Data_out::Get_Points(std::vector<std::pair<double, double >> &point) const {
 
