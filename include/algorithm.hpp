@@ -24,14 +24,14 @@ class Algorithm {
 
  public:
     Algorithm()= delete;
-    explicit Algorithm(std::vector<edge> edgeArr, std::vector<weight> weightArr);
+    explicit Algorithm(const std::vector<edge> &edgeArr, const std::vector<weight> &weightArr);
     ~Algorithm();
     Algorithm(const Algorithm&) = delete;
     Algorithm(const Algorithm&&) = delete;
     Algorithm& operator=(const Algorithm&) = delete;
     Algorithm& operator=(const Algorithm&&) = delete;
 
-    std::vector<dotId> CalcRoute(dotId A, dotId B);
+    std::vector<dotId> CalcRoute(const dotId &A, const dotId &B);
 
  private:
     void MakeGraph();

@@ -4,7 +4,7 @@
 
 #include "algorithm.hpp"
 
-Algorithm::Algorithm(std::vector<edge> edges, std::vector<weight> weights) {
+Algorithm::Algorithm(const std::vector<edge> &edges, const std::vector<weight> &weights) {
 1;
     assert(edges.size() == weights.size());
 
@@ -28,7 +28,7 @@ void Algorithm::MakeGraph() {
             get(boost::edge_weight, myGraph);
 }
 
-std::vector<Algorithm::dotId> Algorithm::CalcRoute(dotId A, dotId B) {
+std::vector<Algorithm::dotId> Algorithm::CalcRoute(const dotId &A, const dotId &B) {
     MakeGraph();
 
     // вектор для пройденных путей
