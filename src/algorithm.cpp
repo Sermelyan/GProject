@@ -4,8 +4,9 @@
 
 #include "algorithm.hpp"
 
-Algorithm::Algorithm(const std::vector<edge> &edges, const std::vector<weight> &weights) {
-1;
+Algorithm::Algorithm(const std::vector<edge> &edges,
+                     const std::vector<weight> &weights) {
+
     assert(edges.size() == weights.size());
 
     edgeSize = edges.size();
@@ -28,7 +29,8 @@ void Algorithm::MakeGraph() {
             get(boost::edge_weight, myGraph);
 }
 
-std::vector<Algorithm::dotId> Algorithm::CalcRoute(const dotId &A, const dotId &B) {
+std::vector<Algorithm::dotId> Algorithm::CalcRoute(const dotId &A,
+                                                   const dotId &B) {
     MakeGraph();
 
     // вектор для пройденных путей
@@ -47,11 +49,11 @@ std::vector<Algorithm::dotId> Algorithm::CalcRoute(const dotId &A, const dotId &
     boost::graph_traits<graph_t>::vertex_descriptor current = pointB;
 
     //  идем в обратную сторону и запоминаем путь
-    while( current != pointA ) {
+    while ( current != pointA ) {
         path.push_back(current);
         current = pastWay[current];
     }
-    path.push_back(pointA); //  добавляем в конец точку с которой начинали
+    path.push_back(pointA);  //  добавляем в конец точку с которой начинали
 
     std::vector<dotId> answer;
 
