@@ -1,15 +1,27 @@
 cmake_minimum_required(VERSION 3.15)
 project(GProject)
 
+find_package(Boost COMPONENTS thread)
+IF (Boost_FOUND)
+    INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
+    ADD_DEFINITIONS( "-DHAS_BOOST" )
+ENDIF()
+
+find_package(Protobuf REQUIRED)
+include_directories(${PROTOBUF_INCLUDE_DIR})
+
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
+
 configure_file(CMakeLists.txt.in
-        googletest-download/CMakeLists.txt)
+googletest-download/CMakeLists.txt)
 execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download )
+WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download )
 execute_process(COMMAND ${CMAKE_COMMAND} --build .
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download )
+WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download )
 
 add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src
-        ${CMAKE_BINARY_DIR}/googletest-build)
+${CMAKE_BINARY_DIR}/googletest-build)
 
 
 set(CMAKE_CXX_STANDARD 17)
@@ -23,11 +35,15 @@ include_directories(include)
 
 add_library(algorithm STATIC src/algorithm.cpp)
 
-add_library(queu STATIC src/queu.cpp)
+add_library(queue STATIC src/queue.cpp)
+
+protobuf_generate_cpp(PROTO_SRC PROTO_HEADER protobuf/structures.proto)
+add_library(proto ${PROTO_HEADER} ${PROTO_SRC})
 
 add_library(server STATIC src/server.cpp)
+target_link_libraries(server ${Boost_LIBRARIES})
 
 add_library(worker STATIC src/worker.cpp)
 
 add_executable(test test/test.cpp)
-target_link_libraries(test gtest)
+target_link_libraries(test gtest gmock server proto ${PROTOBUF_LIBRARY})

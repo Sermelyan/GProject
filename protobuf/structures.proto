@@ -1,0 +1,20 @@
+syntax = "proto3";
+package Data;
+
+message Point {
+    double X = 1;
+    double Y = 2;
+}
+
+
+message In {
+    uint32 TimeLimit = 1;
+    repeated string Filters = 2;
+    uint32 MaxDots = 3;
+    Point StartPoint = 4;
+}
+
+message Out {
+    repeated Point RoutePoints = 1;
+    uint32 MaxTime = 2;
+}
