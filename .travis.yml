@@ -16,9 +16,9 @@ before_install:
   - sudo apt-get install valgrind -y
   - sudo apt-get install protobuf-compiler -y
   - sudo apt-get install libprotobuf-dev -y
-  - sudo add-apt-repository ppa:boost-latest/ppa
-  - sudo apt-get update
-  - sudo apt-get install libboost-all-dev
+  - sudo add-apt-repository ppa:boost-latest/ppa -y
+  - sudo apt-get update -q
+  - sudo apt-get install libboost-all-dev -y
   - CMAKE_VERSION=3.15.4
   - CMAKE_VERSION_DIR=v3.15
   - CMAKE_OS=Linux-x86_64
