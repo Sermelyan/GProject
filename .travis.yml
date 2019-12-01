@@ -13,7 +13,7 @@ before_install:
   - sudo apt-get install g++-9 -y
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 90
   - sudo apt-get install valgrind -y
-  - sudo apt-get install libboost-all-dev -y
+  - sudo apt-get install autoconf automake libtool libboost-all-dev -y
   # - sudo apt-get install build-essential python-dev autotools-dev libicu-dev build-essential libbz2-dev libboost-all-dev -y
   # - wget -O boost_1_71_0.tar.gz https://sourceforge.net/projects/boost/files/boost/1.71.0.beta1/boost_1_71_0_b1.tar.gz/download
   # - tar xzvf boost_1_71_0.tar.gz
@@ -22,14 +22,15 @@ before_install:
   # - ./b2
   # - sudo ./b2 install
   # - cd ..
-  - curl -OL https://github.com/google/protobuf/releases/download/v3.10.1/protoc-3.10.1-linux-x86_64.zip
-  - unzip protoc-3.10.1-linux-x86_64.zip -d protoc3
-  - sudo mv protoc3/bin/* /usr/local/bin/
-  - sudo mv protoc3/include/* /usr/local/include/
-  - sudo chown $USER /usr/local/bin/protoc
-  - sudo chown -R $USER /usr/local/include/google
+  - curl -OL https://github.com/protocolbuffers/protobuf/releases/download/v3.11.0/protobuf-cpp-3.11.0.zip
+  - unzip protobuf-cpp-3.11.zip -d protoc3
+  - cd protoc3
+  - ./configure
+  - make -j2
+  - make -j2 check
+  - sudo make -j2 install
   - sudo ldconfig
-  - Protobuf_INCLUDE_DIR=/usr/local/include/google
+  - cd ..
   - CMAKE_VERSION=3.15.4
   - CMAKE_VERSION_DIR=v3.15
   - CMAKE_OS=Linux-x86_64
