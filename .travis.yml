@@ -25,7 +25,7 @@ before_install:
   - curl -OL https://github.com/protocolbuffers/protobuf/releases/download/v3.11.0/protobuf-cpp-3.11.0.tar.gz
   - mkdir proto3
   - tar --strip-components=1 -xzf protobuf-cpp-3.11.0.tar.gz -C proto3
-  - cd protoc3
+  - cd proto3
   - ./configure
   - make -j2
   - make -j2 check
