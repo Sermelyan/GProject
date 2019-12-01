@@ -22,8 +22,8 @@ before_install:
   # - ./b2
   # - sudo ./b2 install
   # - cd ..
-  - curl -OL https://github.com/protocolbuffers/protobuf/releases/download/v3.11.0/protobuf-cpp-3.11.0.zip
-  - unzip protobuf-cpp-3.11.0.zip -d protoc3
+  - curl -OL https://github.com/protocolbuffers/protobuf/releases/download/v3.11.0/protobuf-cpp-3.11.0.tar.gz
+  - tar --strip-components=1 -xzf protobuf-cpp-3.11.0.tar.gz -C proto3
   - cd protoc3
   - ./configure
   - make -j2
