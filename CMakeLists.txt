@@ -33,15 +33,15 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
 
 include_directories(include)
 
+protobuf_generate_cpp(PROTO_SRC PROTO_HEADER protobuf/structures.proto)
+add_library(proto ${PROTO_HEADER} ${PROTO_SRC})
+
 add_library(algorithm STATIC src/algorithm.cpp)
 
 add_library(queue STATIC src/queue.cpp)
 
-protobuf_generate_cpp(PROTO_SRC PROTO_HEADER protobuf/structures.proto)
-add_library(proto ${PROTO_HEADER} ${PROTO_SRC})
-
 add_library(server STATIC src/server.cpp)
-target_link_libraries(server ${Boost_LIBRARIES})
+target_link_libraries(server proto ${Boost_LIBRARIES})
 
 add_library(worker STATIC src/worker.cpp)
 

@@ -22,7 +22,7 @@ class Client {
  public:
     int user_id;
 
-    explicit Client(const boost::asio::io_service &io) : sock(io) {}
+    explicit Client(boost::asio::io_service &io) : sock(io) {}
     // Client() {};
     ~Client() {}
     void Read();
