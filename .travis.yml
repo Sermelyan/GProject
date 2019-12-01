@@ -6,9 +6,9 @@ os: linux
 compiler: gcc
 
 before_install:
-  - sudo add-apt-repository ppa:boost-latest/ppa -y
   - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
   - sudo apt-get update -q
+  - sudo add-apt-repository ppa:boost-latest/ppa -y
   - sudo apt-get install cppcheck -y
   - sudo apt-get install python2.7 -y
   - sudo apt-get install g++-9 -y
