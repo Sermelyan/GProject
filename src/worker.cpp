@@ -13,8 +13,6 @@ void Worker::GetRibsFromAPI(const std::vector<Point> &points ) {
 
     const std::string jsonForSending = createJsonForSending(points);
 
-    std::cout<<"FOR SEND:"<<jsonForSending<<"\n";
-
     std::string answer;
     getWeightFromPythonAPI(jsonForSending, answer);
 
