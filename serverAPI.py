@@ -10,10 +10,6 @@ def getDistance(xA, yA, xB, yB):
 
 def getWeights(coordinatesList):
     weightDict = {}
-    print("COOR:"+str(coordinatesList) )
-    points = coordinatesList.keys()
-    print("POINTS:" + str(points))
-    
     for i in range(len(coordinatesList)):
         for j in range(len(coordinatesList)):
             if i == j:
