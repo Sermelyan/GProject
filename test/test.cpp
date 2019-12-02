@@ -6,7 +6,6 @@
 #include "worker.hpp"
 
 
-
 TEST(global, distance) {
 
     Worker worker;
