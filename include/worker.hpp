@@ -34,6 +34,7 @@ public:  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! PRIVATE AFTER TESTS !
     typedef std::pair<dotId, dotId> edge;
     typedef std::size_t weight;
 
+    // храним в этих векторах данные, которые получим из API
     std::vector<edge>  edges;
     std::vector<weight> weightArr;
 
@@ -43,20 +44,12 @@ public:  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! PRIVATE AFTER TESTS !
     void GetRibsFromAPI(const std::vector<Point> &points);
     void getWeightFromPythonAPI(const std::string &jsonPoints, std::string &answer);
     std::string createJsonForSending(const std::vector<Point> &points);
-    void setJsonAnswerInClass(const std::string &answer, const size_t pointCount);
+    void setJsonAnswerInClass(const std::string &answer, const size_t &pointCount);
 
-    void GetRoute(const std::vector<Point> &points,
-            const std::vector<std::vector<int>> &ribs, std::list<Point> &res);
+public:
 
+    static long int getWeightIndex(const size_t &pointsCount, const size_t &from, const size_t &to);
 
 };
 #endif  //  INCLUDE_WORKER_HPP_
 
-/*
- * for python server
- *  // sudo apt-get install python3
- *  // надо ли устанавливать pip3??? он же вроде вместе с питоном идет
-    // pip3 install flask
-    // python3 ./main.py
- *
- * */

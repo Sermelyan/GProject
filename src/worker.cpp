@@ -11,29 +11,14 @@ void Worker::GetRibsFromAPI(const std::vector<Point> &points ) {
     if (pointCount < MIN_POINT_COUNT || pointCount > MAX_POINT_COUNT)
         return;
 
-    // const size_t ribsCount = ( pointCount * (pointCount - 1) / 2 ) * 2;  //  теория
-
     const std::string jsonForSending = createJsonForSending(points);
 
-    // std::cout << jsonForSending << "\n";
+    std::cout<<"FOR SEND:"<<jsonForSending<<"\n";
 
     std::string answer;
     getWeightFromPythonAPI(jsonForSending, answer);
 
-    //std::cout<<"===================ANSWER FROM PYTHON==============\n";
-    //std::cout<<answer;
-    //std::cout<<"===================END ANSWER FROM PYTHON==============\n";
-
     setJsonAnswerInClass(answer, pointCount);
-
-    //size_t ribsCount = ( pointCount * (pointCount - 1) / 2 ) * 2 ;
-    //std::cout<<"REAL SIZE:"<<  edges.size()<<" =="<< weightArr.size() <<"\n=============================\n";
-    //std::cout<<"My theoretical SIZE:"<<  ribsCount <<"\n=============================\n";
-
-    // написать тесты
-    // написать хедр нового алгоритма
-    // написать тесты нового алгоритма
-    // написать новый алгоритм
 
 }
 
@@ -108,10 +93,10 @@ void Worker::getWeightFromPythonAPI(const std::string &jsonPoints, std::string &
     answer.erase(0, startJson);
 }
 
-void Worker::setJsonAnswerInClass(const std::string &answer, const size_t pointCount){
+void Worker::setJsonAnswerInClass(const std::string &json, const size_t &pointCount){
 
     boost::property_tree::ptree answerTree;
-    std::istringstream is(answer);
+    std::istringstream is(json);
     boost::property_tree::json_parser::read_json(is, answerTree);
 
     answerTree = answerTree.get_child("weights");
@@ -128,8 +113,18 @@ void Worker::setJsonAnswerInClass(const std::string &answer, const size_t pointC
         }
 }
 
+long int Worker::getWeightIndex(const size_t &pointsCount, const size_t &from, const size_t &to){
 
-void Worker::GetRoute(const std::vector<Point> &points, const std::vector<std::vector<int>> &ribs,
-                      std::list<Point> &res){
+    if (from > pointsCount - 1 || to > pointsCount - 1 ||
+        from == to)
+        return -1; // return error
+
+    if (from == 0)
+        return to - 1;
+
+    if (from < to)
+       return ( (pointsCount -1) * from + to) - 1;
+
+    return ( (pointsCount -1) * from + to);
 
 }
