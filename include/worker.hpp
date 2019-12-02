@@ -9,6 +9,13 @@
 #include <list>
 #include <string>
 #include <sstream>
+#include <boost/beast.hpp>
+#include <boost/asio/connect.hpp>
+#include <boost/asio/ip/tcp.hpp>
+#include <boost/property_tree/json_parser.hpp>
+#include <boost/property_tree/ptree.hpp>
+
+#include <iostream> // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! delete after tests
 
 struct Point
 {
@@ -16,11 +23,13 @@ struct Point
     double  Y;
 };
 
-class Worker
-{
-private:
+namespace http = boost::beast::http;
 
-    // this typedef get from Algorithm
+class Worker {
+
+public:  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! PRIVATE AFTER TESTS !!!!!!!!!!!!!!!!!!!!!!
+
+    // this typedef get from Algorithm before merge we don't know about Algo
     typedef std::size_t dotId;
     typedef std::pair<dotId, dotId> edge;
     typedef std::size_t weight;
@@ -28,15 +37,26 @@ private:
     std::vector<edge>  edges;
     std::vector<weight> weightArr;
 
-    // void GetRibsFromAPI(const std::vector<Point> &points);
-    //std::string getWeightFromPythonAPI(const std::string &jsonPoints);
+    const size_t MAX_POINT_COUNT = 500;
+    const size_t MIN_POINT_COUNT = 3;
+
+    void GetRibsFromAPI(const std::vector<Point> &points);
+    void getWeightFromPythonAPI(const std::string &jsonPoints, std::string &answer);
+    std::string createJsonForSending(const std::vector<Point> &points);
+    void setJsonAnswerInClass(const std::string &answer, const size_t pointCount);
 
     void GetRoute(const std::vector<Point> &points,
             const std::vector<std::vector<int>> &ribs, std::list<Point> &res);
 
-public: //  delete and uncomment 2 fun. it's only for tests
-        void GetRibsFromAPI(const std::vector<Point> &points);
-        void getWeightFromPythonAPI(const std::string &jsonPoints, std::string &answer);
 
 };
 #endif  //  INCLUDE_WORKER_HPP_
+
+/*
+ * for python server
+ *  // sudo apt-get install python3
+ *  // надо ли устанавливать pip3??? он же вроде вместе с питоном идет
+    // pip3 install flask
+    // python3 ./main.py
+ *
+ * */
