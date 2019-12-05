@@ -66,3 +66,78 @@ std::vector<Algorithm::dotId> Algorithm::CalcRoute(const dotId &A,
     return answer;
 }
 
+// new part
+
+struct PointNode {
+    Algorithm::dotId pointId;
+    std::vector<PointNode *> ptrNodeArr;
+};
+
+
+void Algorithm::recBFS(const Algorithm::dotId &from, const size_t &pointsCount,
+            const size_t &time, size_t &currentTime, std::vector<dotId> &visitedPints,
+            std::pair<std::vector<Algorithm::dotId>, size_t> &answer) {
+
+    if (answer.first.size() > MAX_RECURSION)
+        return;
+
+    visitedPints.push_back(from);
+
+    size_t startRibsIndexInEdges = (pointsCount-1) * from;
+    std::cout<<"INDEX START:"<< startRibsIndexInEdges <<"\n";
+
+    std::cout <<"FROM:"<< edgeArr[startRibsIndexInEdges].first <<"(->"<<
+              edgeArr[startRibsIndexInEdges].second<<")\n";
+
+    size_t weightIndex = getWeightIndex(pointsCount, from, 0);
+    for (size_t i = 0 ; i < pointsCount -1 ; i++) {  // не рассматривать посещенные
+        std::cout<<"WEIGHT INDEX:"<<weightIndex<<"\n";
+        std::cout<<"WAY WEIGHT("<<edgeArr[startRibsIndexInEdges].first<<"->"
+                 <<edgeArr[startRibsIndexInEdges + i].second<<"):"<<weightArr[weightIndex] <<"\n";
+        weightIndex++;
+    }
+    // выбрали нужный
+    // и после цикла вызвали
+}
+
+
+// возвращает айди точек по пути и время для обхода
+std::pair<std::vector<Algorithm::dotId>, size_t>
+Algorithm::getRoute(const Algorithm::dotId &from, const size_t &pointsCount, const size_t &time) {
+
+    assert(time > 0);
+
+    // не создавать граф =)
+    // создать массив посещенных
+    // функция поиска ближайшего
+
+    size_t currentTime = 0;
+    //  если пользователь тратит время на нахождение в точке, то следует
+    //  добавлять это время кажыдй раз к currentTime (тут и в поиске)
+    std::pair<std::vector<Algorithm::dotId>, size_t> answer;
+    std::vector<dotId> visitedPints;
+
+    recBFS(from,pointsCount,time,currentTime, visitedPints, answer);
+
+
+    return answer;
+}
+
+
+
+// delete this from algo
+long int Algorithm::getWeightIndex(const size_t &pointsCount, const size_t &from, const size_t &to){
+
+    if (from > pointsCount - 1 || to > pointsCount - 1 ||
+        from == to)
+        return -1; // return error
+
+    if (from == 0)
+        return to - 1;
+
+    if (from < to)
+        return ( (pointsCount -1) * from + to) - 1;
+
+    return ( (pointsCount -1) * from + to);
+
+}

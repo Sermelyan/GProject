@@ -6,6 +6,10 @@
 #include "algorithm.hpp"
 #include <string>  // only for demonstrate display places names
 
+
+/*
+
+
 TEST(test1, algorithm) {
 
     //  у нас есть места, для алгоритма место - просто его id(size_t)
@@ -179,6 +183,81 @@ TEST(test5_manyUse, algorithm) {
     // B
     ASSERT_TRUE(answer.at(0) == B);
 }
+
+*/
+
+// tests for getRoute for interests
+
+TEST(test6getRoute, algorithm) {
+
+    std::vector<Algorithm::edge> edges;
+    std::vector<Algorithm::weight > weights;
+
+    // from 0
+    edges.push_back(std::make_pair(0,1));
+    weights.push_back(7);
+    edges.push_back(std::make_pair(0,2));
+    weights.push_back(4);
+    edges.push_back(std::make_pair(0,3));
+    weights.push_back(18);
+    edges.push_back(std::make_pair(0,4));
+    weights.push_back(10);
+
+    // from 1
+    edges.push_back(std::make_pair(1,0));
+    weights.push_back(7);
+    edges.push_back(std::make_pair(1,2));
+    weights.push_back(9);
+    edges.push_back(std::make_pair(1,3));
+    weights.push_back(10);
+    edges.push_back(std::make_pair(1,4));
+    weights.push_back(31);
+
+    // from 2
+    edges.push_back(std::make_pair(2,0));
+    weights.push_back(4);
+    edges.push_back(std::make_pair(2,1));
+    weights.push_back(9);
+    edges.push_back(std::make_pair(2,3));
+    weights.push_back(21);
+    edges.push_back(std::make_pair(2,4));
+    weights.push_back(15);
+
+    // from 3
+    edges.push_back(std::make_pair(3,0));
+    weights.push_back(18);
+    edges.push_back(std::make_pair(3,1));
+    weights.push_back(10);
+    edges.push_back(std::make_pair(3,2));
+    weights.push_back(21);
+    edges.push_back(std::make_pair(3,4));
+    weights.push_back(5);
+
+    // from 4
+    edges.push_back(std::make_pair(4,0));
+    weights.push_back(10);
+    edges.push_back(std::make_pair(4,1));
+    weights.push_back(31);
+    edges.push_back(std::make_pair(4,2));
+    weights.push_back(15);
+    edges.push_back(std::make_pair(4,3));
+    weights.push_back(5);
+
+    Algorithm algo = Algorithm(edges, weights);
+
+    std::pair<std::vector<Algorithm::dotId>, size_t> answer;
+
+    size_t time = 20;
+    answer = algo.getRoute(2, 5, time);
+
+    std::cout<< "WAY:";
+    for (size_t i = 0 ; i < answer.first.size() ; i++)
+        std::cout<<" "<< answer.first.at(i);
+    std::cout<< "\nTime:" << answer.second;
+
+
+}
+
 
 
 int main(int argc, char** argv) {
