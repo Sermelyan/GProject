@@ -4,7 +4,7 @@
 
 #include <gtest/gtest.h>
 #include <iostream>
-#include "queu.hpp"
+#include "queue.hpp"
 #include <thread>
 
 template <class T>
@@ -99,7 +99,6 @@ TEST(threads_PushMany_PopMany, queue) {
 
     delete []testArrInput;
     delete []testArrOutput;
-    delete gq;
 }
 
 TEST(threads_PushMany_PopMany_Random, queue) {
@@ -145,7 +144,7 @@ TEST(threads_PushMany_PopMany_Random, queue) {
 
     delete []testArrInput;
     delete []testArrOutput;
-    delete gq;
+
 }
 
 

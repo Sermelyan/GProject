@@ -2,11 +2,12 @@
  * Copyright 2019 <Alex>
  */
 
-#ifndef INCLUDE_QUEU_HPP_
-#define INCLUDE_QUEU_HPP_
+#ifndef INCLUDE_QUEUE_HPP_
+#define INCLUDE_QUEUE_HPP_
 
 #include <queue>
 #include <mutex>
+#include <memory>
 
 template <class T>
 class GQueue {
@@ -24,38 +25,35 @@ class GQueue {
 
  private:
     T element404;
-    std::queue<T> * queue;
+    std::unique_ptr<std::queue<T>> queue;
     std::mutex GQueueMutex;
 };
 
 
 template <class T>
 GQueue<T>::~GQueue() {
-    delete queue;
 }
 
 template <class T>
 GQueue<T>::GQueue(const T &element404) {
-    queue = new std::queue<T>;
+    queue.reset(new std::queue<T>);
     this->element404 =  element404;
 }
 
 template <class T>
 void GQueue<T>::push(const T &element) {
-    GQueueMutex.lock();
+    const std::lock_guard<std::mutex> lock(GQueueMutex);
     queue->push(element);
-    GQueueMutex.unlock();
 }
 
 template <class T>
 T GQueue<T>::popIfNotEmpty() {
-    GQueueMutex.lock();
+    const std::lock_guard<std::mutex> lock(GQueueMutex);
     T answer = this->element404;
     if (!queue->empty()) {
         answer = queue->front();
         queue->pop();
     }
-    GQueueMutex.unlock();
     return answer;
 }
 
