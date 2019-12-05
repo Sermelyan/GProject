@@ -7,9 +7,6 @@
 #include <string>  // only for demonstrate display places names
 
 
-/*
-
-
 TEST(test1, algorithm) {
 
     //  у нас есть места, для алгоритма место - просто его id(size_t)
@@ -184,10 +181,8 @@ TEST(test5_manyUse, algorithm) {
     ASSERT_TRUE(answer.at(0) == B);
 }
 
-*/
 
 // tests for getRoute for interests
-
 TEST(test6getRoute, algorithm) {
 
     std::vector<Algorithm::edge> edges;
@@ -247,17 +242,66 @@ TEST(test6getRoute, algorithm) {
 
     std::pair<std::vector<Algorithm::dotId>, size_t> answer;
 
-    size_t time = 20;
-    answer = algo.getRoute(2, 5, time);
+    size_t time = 24;
+    answer = algo.getRoute(2, 5, time, 4);
+    ASSERT_TRUE(answer.first.size() == 4 && answer.second == 21);
 
-    std::cout<< "WAY:";
-    for (size_t i = 0 ; i < answer.first.size() ; i++)
-        std::cout<<" "<< answer.first.at(i);
-    std::cout<< "\nTime:" << answer.second;
+    // не времени никуда добраться
+    time = 3;
+    answer = algo.getRoute(2, 5, time, 3);
+    ASSERT_TRUE(answer.first.size() == 1 && answer.second == 0);
 
+    // граничное условие на время
+    time = 11;
+    answer = algo.getRoute(2, 5, time, 3);
+    ASSERT_TRUE(answer.first.size() == 3 && answer.second == 11);
+
+    //  много времени
+    time = 1100;
+    answer = algo.getRoute(4, 5, time, 5);
+    ASSERT_TRUE(answer.first.size() == 5 && answer.second == 26);
+    ASSERT_TRUE(answer.first.at(0)== 4 && answer.first.at(1)== 3 &&
+                answer.first.at(2)== 1 && answer.first.at(3)== 0 &&
+                answer.first.at(4)== 2);
+
+    //  много времени но не более 2 точек
+    time = 1100;
+    answer = algo.getRoute(1, 5, time, 2);
+    ASSERT_TRUE(answer.first.size() == 3 && answer.second == 11);
+    ASSERT_TRUE(answer.first.at(0)== 1 && answer.first.at(1)== 0 &&
+                answer.first.at(2)== 2);
+
+    time = 1100;
+    answer = algo.getRoute(1, 5, time, 2);
+    ASSERT_TRUE(answer.first.size() == 3 && answer.second == 11);
+    ASSERT_TRUE(answer.first.at(0)== 1 && answer.first.at(1)== 0 &&
+                answer.first.at(2)== 2);
+
+    time = 17;
+    answer = algo.getRoute(3, 5, time, 3);
+    ASSERT_TRUE(answer.first.size() == 3 && answer.second == 15);
+    ASSERT_TRUE(answer.first.at(0)== 3 && answer.first.at(1)== 4 &&
+                answer.first.at(2)== 0);
+
+    time = 19;
+    answer = algo.getRoute(3, 5, time, 3);
+    ASSERT_TRUE(answer.first.size() == 4 && answer.second == 19);
+    ASSERT_TRUE(answer.first.at(0)== 3 && answer.first.at(1)== 4 &&
+                answer.first.at(3)== 2);
+
+    time = 100;
+    answer = algo.getRoute(0, 5, time, 3);
+    ASSERT_TRUE(answer.first.size() == 4 && answer.second == 23);
+    ASSERT_TRUE(answer.first.at(0)== 0 && answer.first.at(1)== 2 &&
+                answer.first.at(3)== 3);
+
+    time = 100;
+    answer = algo.getRoute(0, 5, time, 4);
+    ASSERT_TRUE(answer.first.size() == 5 && answer.second == 28);
+    ASSERT_TRUE(answer.first.at(0)== 0 && answer.first.at(1)== 2 &&
+                answer.first.at(4)== 4);
 
 }
-
 
 
 int main(int argc, char** argv) {

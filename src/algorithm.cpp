@@ -67,66 +67,77 @@ std::vector<Algorithm::dotId> Algorithm::CalcRoute(const dotId &A,
 }
 
 // new part
-
-struct PointNode {
-    Algorithm::dotId pointId;
-    std::vector<PointNode *> ptrNodeArr;
-};
-
-
-void Algorithm::recBFS(const Algorithm::dotId &from, const size_t &pointsCount,
-            const size_t &time, size_t &currentTime, std::vector<dotId> &visitedPints,
-            std::pair<std::vector<Algorithm::dotId>, size_t> &answer) {
-
-    if (answer.first.size() > MAX_RECURSION)
-        return;
-
-    visitedPints.push_back(from);
-
-    size_t startRibsIndexInEdges = (pointsCount-1) * from;
-    std::cout<<"INDEX START:"<< startRibsIndexInEdges <<"\n";
-
-    std::cout <<"FROM:"<< edgeArr[startRibsIndexInEdges].first <<"(->"<<
-              edgeArr[startRibsIndexInEdges].second<<")\n";
-
-    size_t weightIndex = getWeightIndex(pointsCount, from, 0);
-    for (size_t i = 0 ; i < pointsCount -1 ; i++) {  // не рассматривать посещенные
-        std::cout<<"WEIGHT INDEX:"<<weightIndex<<"\n";
-        std::cout<<"WAY WEIGHT("<<edgeArr[startRibsIndexInEdges].first<<"->"
-                 <<edgeArr[startRibsIndexInEdges + i].second<<"):"<<weightArr[weightIndex] <<"\n";
-        weightIndex++;
-    }
-    // выбрали нужный
-    // и после цикла вызвали
-}
-
-
-// возвращает айди точек по пути и время для обхода
+// возвращает id точек пути (включая исходную) и время для обхода
 std::pair<std::vector<Algorithm::dotId>, size_t>
-Algorithm::getRoute(const Algorithm::dotId &from, const size_t &pointsCount, const size_t &time) {
+Algorithm::getRoute(Algorithm::dotId from, const size_t &pointsCount,
+                    const size_t &time, const size_t &maxPlacesCount) {
 
     assert(time > 0);
-
-    // не создавать граф =)
-    // создать массив посещенных
-    // функция поиска ближайшего
+    assert(maxPlacesCount > 1);
 
     size_t currentTime = 0;
     //  если пользователь тратит время на нахождение в точке, то следует
-    //  добавлять это время кажыдй раз к currentTime (тут и в поиске)
+    //  добавлять это время кажыдй раз к currentTime
     std::pair<std::vector<Algorithm::dotId>, size_t> answer;
-    std::vector<dotId> visitedPints;
+    std::unordered_set<dotId> visitedPints;
+    visitedPints.insert(from); // пользователь был в точке из который начинает маршут
+    answer.first.push_back(from); // дабавим начальную точку в путь
 
-    recBFS(from,pointsCount,time,currentTime, visitedPints, answer);
+    // компаратор, чтобы сравнивать претендентов на место следущей точки
+    auto comp = [](std::pair<dotId, size_t> a, std::pair<dotId, size_t> b)
+            { return a.second < b.second; };
 
+    while(true) {
+        if (answer.first.size() >= maxPlacesCount + 1 ||  //  maxPlacesCount + 1 так как в ответе
+                answer.first.size() > MAX_PLACES)       //  уже есть начальная точка
+            break;
 
+        //  получаем индекс, с которого находятся ребра от нашей вершины
+        size_t startRibsIndexInEdges = (pointsCount-1) * from;
+
+        //  получаем индекс, с которого находятся веса от нашей вершины
+        size_t weightIndex = getWeightIndex(pointsCount, from, edgeArr[startRibsIndexInEdges].second);
+
+        //  возможные пути из точки
+        std::set< std::pair<dotId, size_t>, decltype(comp) > nextPointPretendents(comp);
+
+        // обходим места, куда можем попасть из данной точки
+        for (size_t i = 0 ; i < pointsCount -1 ; i++, weightIndex++) {
+
+            // не рассматриваем посещенные точки
+            if ( visitedPints.find(edgeArr[startRibsIndexInEdges + i].second) != visitedPints.end() )
+                continue;
+
+            // сохраняем допустимую точку
+            nextPointPretendents.insert(std::make_pair(edgeArr[startRibsIndexInEdges + i].second,
+                                                          weightArr[weightIndex]));
+        }
+
+        //  ничего не добавили => всё обошли
+        if (nextPointPretendents.empty())
+            break;
+
+        //  получаем ближайшую точку
+        std::pair<dotId, size_t> pretendent = *nextPointPretendents.begin();
+        if (currentTime + pretendent.second <= time) {
+            currentTime += pretendent.second;
+            from = pretendent.first;
+            answer.first.push_back(pretendent.first);
+            visitedPints.insert(pretendent.first);
+        } else
+        //  ближайшая точка вне досягаемости за оставшееся время
+        break;
+
+    }
+    answer.second = currentTime;
     return answer;
 }
 
 
-
 // delete this from algo
-long int Algorithm::getWeightIndex(const size_t &pointsCount, const size_t &from, const size_t &to){
+// данная функция будет вызываться как статическая из воркера-апи
+long int Algorithm::getWeightIndex(const size_t &pointsCount, const size_t &from,
+                                   const size_t &to) {
 
     if (from > pointsCount - 1 || to > pointsCount - 1 ||
         from == to)

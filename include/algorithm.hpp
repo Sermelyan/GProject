@@ -6,13 +6,12 @@
 #define INCLUDE_ALGORITHM_HPP_
 #include <utility>
 #include <vector>
+#include <unordered_set>
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/dijkstra_shortest_paths.hpp>
-
 #include <assert.h>
 
-#include <iostream>  // delete after tests
 
 class Algorithm {
 
@@ -38,11 +37,10 @@ class Algorithm {
     std::vector<dotId> CalcRoute(const dotId &A, const dotId &B);
 
     std::pair<std::vector<Algorithm::dotId>, size_t>
-    getRoute(const dotId &from, const size_t &pointsCount, const size_t &time);
+    getRoute(dotId from, const size_t &pointsCount,
+            const size_t &time, const size_t &maxPlacesCount);
 
-    void recBFS(const Algorithm::dotId &from, const size_t &pointsCount,
-                const size_t &time, size_t &currentTime, std::vector<dotId> &visitedPints,
-                std::pair<std::vector<Algorithm::dotId>, size_t> &answer);
+
 
     // delete this from algo and use from WorkerAPI
     long int getWeightIndex(const size_t &pointsCount, const size_t &from, const size_t &to);
@@ -53,6 +51,6 @@ class Algorithm {
     size_t edgeSize;
     weight * weightArr;
     graph_t myGraph;
-    const size_t MAX_RECURSION = 200; // контроль рекурсии (максимальное кол-во мест в пути)
+    const size_t MAX_PLACES = 200;  // контроль (максимальное кол-во мест в пути)
 };
 #endif  //  INCLUDE_ALGORITHM_HPP_
