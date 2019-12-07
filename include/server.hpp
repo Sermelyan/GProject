@@ -24,7 +24,7 @@ class Client {
    public:
     int user_id;
 
-    explicit Client(boost::asio::io_service &io, GQueue<DataIn> const *in);
+    explicit Client(boost::asio::io_service &io, GQueue<DataIn> &in);
     ~Client();
     void Read();
     void Write(const DataOut &out);
@@ -45,7 +45,7 @@ class Client {
 
 class Server {
    public:
-    Server(GQueue<DataIn> const *in, GQueue<DataOut> const *out, unsigned Port);
+    Server(GQueue<DataIn> &in, GQueue<DataOut> &out, unsigned Port);
     ~Server();
 
     void Kill();
@@ -63,9 +63,9 @@ class Server {
     unsigned port;
 
     void startAccept();
-    void onAccept(std::shared_ptr<Client> c, const error_code &e);
+    void onAccept(std::shared_ptr<Client> c, const boost::system::error_code &e);
     void onSend(std::shared_ptr<Client> c, const DataOut &out,
-                const error_code &e);
+                const boost::system::error_code &e);
 
     void sillyServer();
 

@@ -17,7 +17,7 @@ class ClientAdapter {
     Client c;
 
    public:
-    ClientAdapter() = default;
+    ClientAdapter(GQueue<DataIn>& _in) : c(boost::asio::io_service, _in) {}
     ~ClientAdapter() = default;
 
     std::unique_ptr<DataIn> Unmarshal(const std::string& buffer) {
@@ -81,16 +81,19 @@ class ClientTest : public ::testing::Test {
 
     std::string in_bytes;
     std::string out_bytes;
+
+    GQueue<DataIn> QIn;
+    GQueue<DataOut> QOut;
 };
 
 TEST_F(ClientTest, MarshalTest) {
-    ClientAdapter c;
+    ClientAdapter c(QIn);
     std::string marshaled(c.Marshal(out));
     ASSERT_EQ(marshaled, out_bytes);
 }
 
 TEST_F(ClientTest, UnmarshalTest) {
-    ClientAdapter c;
+    ClientAdapter c(QIn);
     auto in_test = c.Unmarshal(in_bytes);
     ASSERT_EQ(in_test->FilterList, in.FilterList);
     ASSERT_EQ(in_test->MaxDots, in.MaxDots);
@@ -126,7 +129,7 @@ class SyncClient {
 };
 
 TEST_F(ClientTest, EchoTest1) {
-    Server s(nullptr, nullptr, 6666);
+    Server s(QIn, QOut, 6666);
     std::thread server_thr(std::bind(&Server::StartEchoServer, &s));
     boost::this_thread::sleep(boost::posix_time::millisec(100));
     std::string str("Test echo string!");
@@ -139,7 +142,7 @@ TEST_F(ClientTest, EchoTest1) {
 }
 
 TEST_F(ClientTest, EchoTest2) {
-    Server s(nullptr, nullptr, 6666);
+    Server s(QIn, QOut, 6666);
     std::thread server_thr(std::bind(&Server::StartEchoServer, &s));
     s.StartEchoServer();
     boost::this_thread::sleep(boost::posix_time::millisec(100));
