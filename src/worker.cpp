@@ -1,169 +1,117 @@
 #include "worker.hpp"
 #include "queu.hpp"
 
-//Worker::Worker()
-//{
-//
-//}
-
-Worker::Worker(Queue &in, Queue &out, Sqlite &DataBase):In(in), Out(out), DB(DataBase)
-{
+Worker::Worker(Queue &in, Queue &out, const char *DBName):In(in), Out(out), DB(DBName), Stop(false), WProces(std::bind(&Worker::WorkerProcess, this)) { //TODO добавить апи
 }
 
 Worker::~Worker(){
-
+    printf("End WorkerProc \n");
+    WProces.join();
 }
 
-Data_in Worker::GetFromQueueIn(){
-    Data_in a;
+DataIn Worker::GetFromQueueIn(){
+    DataIn a;
     return a;
 }
 
-void  Worker::SendToQueueOut(const Data_out &value){
-
+void Worker::SendToQueueOut(const DataOut &value){
+//    Out.push(value)
 }
-void Worker::GetDotsFromDB(const Data_in &value, std::vector<Point> &points){
-
-}
-
-void Worker::GetRibsFromAPI(const std::vector<Point> &points, std::vector<std::vector<double >> &ribs){
-
+void Worker::GetDotsFromDB(const DataIn &value, std::vector<Point> &points){
+    // разобрать дата ин и отправить скл запрос
+//    Data_in.
 }
 
-void Worker::GetRoute(const std::vector<Point> &points, const std::vector<std::vector<int>> &ribs,
-                      std::list<Point> &res){
-
+void Worker::GetRibsFromAPI(const std::vector<Point> &points){
+    for ( int i = 0; i < points.size(); ++i ) {
+        for(int j = 0; j < points.size() - 1; ++j ) {
+            weightArr.push_back(2);
+            edges.push_back(std::make_pair(i, j));
+        }
+    }
 }
 
-void Worker::WorkerProcess()
-{
+void Worker::GetRoute(const std::vector<std::pair<size_t,size_t>>  edge, const std::vector<size_t> weight,
+                      std::pair<std::vector<int>, size_t> &res){
+    //вызов алгоритма
+//    algorithm way(edge, weight); //  из апи 2 массива
+//    way.getRoute();
+}
 
+void Worker::FinalPoints(std::vector<Point> &points, const std::pair<std::vector<int>, size_t> &res){
+    std::vector<Point> buf;
+    for( int i = 0;  i < res.first.size(); ++i ) {
+        buf.push_back(points[res.first[i]]);
+    }
+    points.clear();
+    points = buf;
+}
+
+void Worker::WorkerProcess(){
+    int counter = 1;
+    printf("Start WorkerProc \n");
+    while ( !Stop ) {
+        DataIn value = GetFromQueueIn();
+        DataIn Incorect;
+        if ( value == Incorect ) {
+            sleep(200);
+        } else {
+            std::vector<Point> PointsResFromDB;
+            GetDotsFromDB(value, PointsResFromDB);
+            std::vector<std::vector<double>> RibsResFromApi;
+            GetRibsFromAPI(PointsResFromDB);
+            std::pair<std::vector<int>, size_t> Res;
+            GetRoute(edges, weightArr, Res);
+            FinalPoints(PointsResFromDB, Res);
+            DataOut OutValue(PointsResFromDB,Res.second,value.UserID);
+            SendToQueueOut(OutValue);
+        }
+    }
 }
 
 void Worker::Kill() {
-
+    Stop = true;
 }
 
-Data_in::Data_in()
-{
+//=================================================================================================================
 
-}
+static int callback(void *data, int argc, char **argv, char **azColName){
+    int i;
+    fprintf(stderr, "%s: ", (const char*)data);
 
-Data_in::Data_in(const std::vector<std::string> &f, const int id, const Limit l){
-    for(const auto & i : f) {
-        Filters.push_back(i);
+    for(i = 0; i<argc; i++){
+        printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
     }
-    User_id = id;
-    for( int i = 0; i < 4; ++i ) {
-        limits.Point[i] = l.Point[i];
+
+    printf("\n");
+    return 0;
+}
+
+Sqlite::Sqlite(const char * filename) {
+    zErrMsg = 0;
+    rc = sqlite3_open(filename, &DB);
+}
+
+void Sqlite::Select(const char *sql, std::vector<Point> res) {
+    const char* data = "Callback function called";
+    if( rc ) {
+        fprintf(stderr, "Cant open database: %s\n", sqlite3_errmsg(DB));
+//        return(0);
+    } else {
+        fprintf(stderr, "Opened \n");
     }
-    limits.Time = l.Time;
+    rc = sqlite3_exec(DB, sql, callback, (void*)data, &zErrMsg);
+
+    if( rc != SQLITE_OK ) {
+        fprintf(stderr, "SQL error: %s \n", zErrMsg);
+        sqlite3_free(zErrMsg);
+    } else {
+        fprintf(stdout, "Successfully \n");
+    }
 }
 
-Data_in::~Data_in()
-{
-    this->Filters.clear();
+Sqlite::~Sqlite() {
+    sqlite3_close(DB);
 }
 
-Limit Data_in::Get_Limit() const
-{
-    Limit a;
-    return a;
-}
 
-void Data_in::Get_Filters(std::vector<std::string> &filtr) const
-{
-
-}
-
-void Data_in::Set_Limit(const Limit value)
-{
-
-}
-
-void Data_in::Set_Filters(const std::vector<std::string> &filtr)
-{
-
-}
-
-Data_in Data_in::operator=(const Data_in &Reight)
-{
-    Data_in a;
-    return a;
-}
-
-bool operator==(const Data_in left, const Data_in right){
-    return true;
-}
-
-bool operator==(const Point left, const Point right){
-//    if(left.X == right.X && left.Y == right.Y){
-//        return true;
-//    }
-    return true;
-}
-
-bool operator==(const Data_out left, const Data_out right){
-    return true;
-}
-
-Data_out::Data_out()
-{
-
-}
-
-Data_out::Data_out(const std::vector<Point> &point, const int id, const int time)
-{
-    this->Points.clear();
-//    for(int i = 0; i < point.size(); ++i){
-//        Points.push_back(point[i].X);
-//        Points[i].Y.push_back(point[i].Y);
-//    }
-    this->User_id = id;
-    this->Time = time;
-}
-
-Data_out::~Data_out()
-{
-    this->Points.clear();
-}
-
-void Data_out::Get_Points(std::vector<std::pair<double, double >> point) const
-{
-
-}
-
-int Data_out::Get_Id() const
-{
-    return 1;
-}
-
-int Data_out::Get_Time() const
-{
-    return 1;
-}
-
-void Data_out::Set_Id(const int id)
-{
-
-}
-
-void Data_out::Set_Time(const int time)
-{
-
-}
-
-void Data_out::Set_Points(std::vector<std::pair<double, double >> &point)
-{
-
-}
-
-Data_out Data_out::operator=(testing::internal::OnCallSpec<Data_out(void)> Reight)
-{
-    Data_out a;
-    return a;
-}
-
-void Data_out::Get_Points(std::vector<std::pair<double, double >> &point) const {
-
-}
