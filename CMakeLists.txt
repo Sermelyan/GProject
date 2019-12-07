@@ -29,5 +29,8 @@ add_library(server STATIC src/server.cpp)
 
 add_library(worker STATIC src/worker.cpp)
 
-add_executable(test test/test.cpp)
+
 target_link_libraries(test gtest queue)
+add_executable(test test/test.cpp src/worker.cpp)
+
+
