@@ -1,7 +1,7 @@
 #include "worker.hpp"
 #include "queu.hpp"
 
-Worker::Worker(Queue &in, Queue &out, const char *DBName):In(in), Out(out), DB(DBName), Stop(false), WProces(std::bind(&Worker::WorkerProcess, this)) { //TODO добавить апи
+Worker::Worker(GQueue<DataIn> &in, GQueue<DataOut> &out, const char *DBName):In(in), Out(out), DB(DBName), Stop(false), WProces(std::bind(&Worker::WorkerProcess, this)) { //TODO добавить апи
 }
 
 Worker::~Worker(){
@@ -15,7 +15,7 @@ DataIn Worker::GetFromQueueIn(){
 }
 
 void Worker::SendToQueueOut(const DataOut &value){
-//    Out.push(value)
+    Out.push(value);
 }
 void Worker::GetDotsFromDB(const DataIn &value, std::vector<Point> &points){
     // разобрать дата ин и отправить скл запрос
@@ -32,10 +32,10 @@ void Worker::GetRibsFromAPI(const std::vector<Point> &points){
 }
 
 void Worker::GetRoute(const std::vector<std::pair<size_t,size_t>>  edge, const std::vector<size_t> weight,
-                      std::pair<std::vector<int>, size_t> &res){
+                      std::pair<std::vector<int>, size_t> &res, size_t num_dots, DataIn value){
     //вызов алгоритма
 //    algorithm way(edge, weight); //  из апи 2 массива
-//    way.getRoute();
+//    way.getRoute(value.StartPoint, num_dots, value.TimeLimit, value.MaxDots);
 }
 
 void Worker::FinalPoints(std::vector<Point> &points, const std::pair<std::vector<int>, size_t> &res){
@@ -61,7 +61,7 @@ void Worker::WorkerProcess(){
             std::vector<std::vector<double>> RibsResFromApi;
             GetRibsFromAPI(PointsResFromDB);
             std::pair<std::vector<int>, size_t> Res;
-            GetRoute(edges, weightArr, Res);
+            GetRoute(edges, weightArr, Res, PointsResFromDB.size(), value);
             FinalPoints(PointsResFromDB, Res);
             DataOut OutValue(PointsResFromDB,Res.second,value.UserID);
             SendToQueueOut(OutValue);

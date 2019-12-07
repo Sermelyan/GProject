@@ -38,8 +38,8 @@ class Worker
 private:
     DataIn request;
     Sqlite DB;
-    Queue &In;
-    Queue &Out;
+    GQueue<DataIn> &In;
+    GQueue<DataOut> &Out;
     bool Stop;
     std::vector<std::pair<size_t,size_t>>  edges; // вектор из 2 точек
     std::vector<size_t> weightArr; // вес ребра
@@ -49,12 +49,12 @@ private:
     void GetDotsFromDB(const DataIn &value, std::vector<Point> &points);
     void GetRibsFromAPI(const std::vector<Point> &points);
     void GetRoute(std::vector<std::pair<size_t,size_t>>  edges, std::vector<size_t> weightArr,
-            std::pair<std::vector<int>, size_t> &res);
+            std::pair<std::vector<int>, size_t> &res, size_t num_dots, DataIn value);
     void FinalPoints(std::vector<Point> &points, const std::pair<std::vector<int>, size_t> &res);
     void WorkerProcess();
 
 public:
-    Worker(Queue &in, Queue &out, const char * DBName);
+    Worker(GQueue<DataIn> &in, GQueue<DataOut> &out, const char * DBName);
     ~Worker();
     void Kill();
     FRIEND_TEST(Get, Get_from_queu);

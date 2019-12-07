@@ -25,12 +25,12 @@ using ::testing::TypedEq;
 //    MOCK_METHOD0_T(close, void());
 //};
 
-class MockQueue : public Queue
-{
-public:
-    MOCK_METHOD1(push, bool(DataIn &value));
-    MOCK_METHOD0_T(pop, DataOut());
-};
+//class MockQueue : public Queue
+//{
+//public:
+//    MOCK_METHOD1(push, bool(DataIn &value));
+//    MOCK_METHOD0_T(pop, DataOut());
+//};
 
 //Data_out Data_out::operator=(testing::internal::OnCallSpec<Data_out(void)> Reight)
 //{
@@ -39,8 +39,12 @@ public:
 //}
 
 TEST(Get, Get_from_queu) {
-    MockQueue In;
-    MockQueue Out;
+    DataIn NotCorrect;
+    NotCorrect.UserID = -1;
+    DataOut NotCorrect2;
+    NotCorrect2.UserID = -1;
+    GQueue<DataIn> In(NotCorrect);
+    GQueue<DataOut> Out(NotCorrect2);
     const char* name = "test.db";
 //    Sqlite DB(name);
 //    MockDatabase DB;
@@ -52,8 +56,8 @@ TEST(Get, Get_from_queu) {
 //    lim.Time = 256;
 //    Data_in value(filters,1, lim);
 //    ON_CALL(In, push(value)).WillByDefault(Return(true));
-    Worker w1(In,Out,name);
-    Worker w2(In,Out,name);
+    Worker w1(In, Out, name);
+    Worker w2(In, Out, name);
 
     for ( int i = 0; i < 100; i++ ){
         printf("white ");
