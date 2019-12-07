@@ -12,9 +12,12 @@ message In {
     repeated string Filters = 2;
     uint32 MaxDots = 3;
     Point StartPoint = 4;
+    Point EndPoint = 5;
+    uint32 UserID = 6;
 }
 
 message Out {
     repeated Point RoutePoints = 1;
     uint32 MaxTime = 2;
+    uint32 UserID = 3;
 }

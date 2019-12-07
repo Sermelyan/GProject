@@ -4,6 +4,8 @@
 
 #include <memory>
 #include <string>
+#include <thread>
+#include <utility>
 #include <vector>
 
 #include <boost/asio.hpp>
@@ -16,54 +18,59 @@
 #ifndef INCLUDE_SERVER_HPP_
 #define INCLUDE_SERVER_HPP_
 
-class ClientPub;
+class ClientAdapter;
 
 class Client {
- public:
+   public:
     int user_id;
 
-    explicit Client(boost::asio::io_service &io) : sock(io) {}
-    // Client() {};
-    ~Client() {}
+    explicit Client(boost::asio::io_service &io);
+    Client() = default;
+    ~Client();
     void Read();
-    void Write(const Out &out);
-    friend class ClientPub;
+    void Write(const DataOut &out);
 
- private:
-    boost::asio::ip::tcp::socket sock;
+   private:
+    friend class ClientAdapter;
+    boost::asio::ip::tcp::socket *sock;
     char buffer[1024];
 
     void handleRead(const boost::system::error_code &e);
     void handleWrite(const boost::system::error_code &e);
 
-    In unmarshal(const std::string &buffer) {}
-    std::string marshal(const Out &out) {}
+    static std::unique_ptr<DataIn> unmarshal(const std::string &buffer);
+    static std::string marshal(const DataOut &out);
 
-    void sendToQueue(const In &data);
+    void sendToQueue(const DataIn &data);
 };
 
 class Server {
- public:
-    Server(Queue<In> *in, Queue<Out> *out, unsigned Port);
+   public:
+    Server(Queue<DataIn> const *in, Queue<DataOut> const *out, unsigned Port);
     ~Server();
 
     void Kill();
     void StartServer();
+    void StartEchoServer();
 
- private:
+   private:
     std::vector<std::thread> threads;
-    std::vector<std::shared_ptr<Client>> waitingClients;
+    std::vector<std::unique_ptr<Client>> waitingClients;
     boost::asio::io_service service;
-    boost::asio::ip::tcp::acceptor acceptor;
-    Queue<In> &in;
-    Queue<Out> &out;
+    boost::asio::ip::tcp::acceptor *acceptor;
+    Queue<DataIn> const *in;
+    Queue<DataOut> const *out;
+    bool alive;
+    unsigned port;
 
     void startAccept();
     void onAccept();
     void startSend();
     void onSend();
 
-    Out GetFromQueue();
+    void sillyServer();
+
+    DataOut GetFromQueue();
 };
 
 #endif  //  INCLUDE_SERVER_HPP_

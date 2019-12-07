@@ -10,30 +10,36 @@
 #ifndef INCLUDE_DATA_HPP_
 #define INCLUDE_DATA_HPP_
 
-static const unsigned SEC_IN_HOUR = 3600;
-static const unsigned SEC_IN_MIN = 60;
+static const unsigned MIN_IN_HOUR = 60;
 
-typedef std::pair<double, double> point;
-typedef std::vector<point> points;
-typedef std::vector<std::string> filters;
+typedef std::pair<double, double> Point;
+typedef std::vector<Point> Points;
+typedef std::vector<std::string> Filters;
 
-struct In {
-    filters Filters;
+struct DataIn
+        {
+    Filters FilterList;
     unsigned TimeLimit;
     unsigned MaxDots;
-    point StartPoint;
+    Point StartPoint;
+    Point EndPoint;
     int UserID;
-    In() {}
-    In(const filters &_f, unsigned _t, const point &_p, int _u)
-        : Filters(_f), TimeLimit(_t), StartPoint(_p), UserID(_u) {}
+    DataIn() {}
+    DataIn(::Filters _f, unsigned _t, unsigned _md, Point _sp, Point _ep, int _u)
+        : FilterList(_f),
+          TimeLimit(_t),
+          MaxDots(_md),
+          StartPoint(_sp),
+          EndPoint(_ep),
+          UserID(_u) {}
 };
 
-struct Out {
-    points RoutePoints;
+struct DataOut {
+    Points RoutePoints;
     unsigned MaxTime;
     int UserID;
-    Out() {}
-    Out(const points &_p, unsigned _t, int _u)
+    DataOut() {}
+    DataOut(const Points&& _p, unsigned _t, int _u)
         : RoutePoints(_p), MaxTime(_t), UserID(_u) {}
 };
 
