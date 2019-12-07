@@ -23,21 +23,15 @@ include_directories(include)
 
 add_library(algorithm STATIC src/algorithm.cpp)
 
-add_library(queu STATIC src/queu.cpp)
+add_library(queue STATIC src/queue.cpp)
 
 add_library(server STATIC src/server.cpp)
 
 add_library(worker STATIC src/worker.cpp)
 
-set(Boost_USE_STATIC_LIBS OFF)
-set(Boost_USE_MULTITHREADED ON)
-set(Boost_USE_STATIC_RUNTIME OFF)
 
-find_package(Boost COMPONENTS graph)
-IF (Boost_FOUND)
-    INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
-    ADD_DEFINITIONS( "-DHAS_BOOST" )
-ENDIF()
 
-add_executable(test test/test.cpp src/algorithm.cpp ${Boost_LIBRARIES})
-target_link_libraries(test gtest)
+
+target_link_libraries(test gtest queue)
+add_executable(test test/test.cpp src/worker.cpp src/algorithm.cpp )
+

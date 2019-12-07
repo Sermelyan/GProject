@@ -4,6 +4,7 @@
 
 #include "algorithm.hpp"
 
+
 Algorithm::Algorithm(const std::vector<edge> &edges,
                      const std::vector<weight> &weights) {
 
@@ -152,3 +153,4 @@ long int Algorithm::getWeightIndex(const size_t &pointsCount, const size_t &from
     return ( (pointsCount -1) * from + to);
 
 }
+

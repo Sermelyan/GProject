@@ -24,6 +24,9 @@ before_install:
   - mkdir -p $CMAKE_DIR
   - tar --strip-components=1 -xzf $CMAKE_TAR -C $CMAKE_DIR
   - export PATH=$CMAKE_DIR/bin:$PATH
+  - sudo apt-get install python3
+  - sudo pip install flask
+  - sudo python ./serverAPI.py &
 
 script:
   - ./linters/run.sh --local

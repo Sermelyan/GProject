@@ -12,7 +12,6 @@
 #include <boost/graph/dijkstra_shortest_paths.hpp>
 #include <assert.h>
 
-
 class Algorithm {
 
  public:
@@ -53,4 +52,5 @@ class Algorithm {
     graph_t myGraph;
     const size_t MAX_PLACES = 200;  // контроль (максимальное кол-во мест в пути)
 };
+
 #endif  //  INCLUDE_ALGORITHM_HPP_
