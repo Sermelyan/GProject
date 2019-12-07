@@ -1,6 +1,7 @@
 #include "worker.hpp"
 #include "queu.hpp"
 
+
 Worker::Worker(GQueue<DataIn> &in, GQueue<DataOut> &out, const char *DBName):In(in), Out(out), DB(DBName), Stop(false), WProces(std::bind(&Worker::WorkerProcess, this)) { //TODO добавить апи
 }
 
@@ -89,29 +90,29 @@ static int callback(void *data, int argc, char **argv, char **azColName){
 
 Sqlite::Sqlite(const char * filename) {
     zErrMsg = 0;
-    rc = sqlite3_open(filename, &DB);
+//    rc = sqlite3_open(filename, &DB);
 }
 
 void Sqlite::Select(const char *sql, std::vector<Point> res) {
-    const char* data = "Callback function called";
-    if( rc ) {
-        fprintf(stderr, "Cant open database: %s\n", sqlite3_errmsg(DB));
-//        return(0);
-    } else {
-        fprintf(stderr, "Opened \n");
-    }
-    rc = sqlite3_exec(DB, sql, callback, (void*)data, &zErrMsg);
-
-    if( rc != SQLITE_OK ) {
-        fprintf(stderr, "SQL error: %s \n", zErrMsg);
-        sqlite3_free(zErrMsg);
-    } else {
-        fprintf(stdout, "Successfully \n");
-    }
+//    const char* data = "Callback function called";
+//    if( rc ) {
+//        fprintf(stderr, "Cant open database: %s\n", sqlite3_errmsg(DB));
+////        return(0);
+//    } else {
+//        fprintf(stderr, "Opened \n");
+//    }
+//    rc = sqlite3_exec(DB, sql, callback, (void*)data, &zErrMsg);
+//
+//    if( rc != SQLITE_OK ) {
+//        fprintf(stderr, "SQL error: %s \n", zErrMsg);
+//        sqlite3_free(zErrMsg);
+//    } else {
+//        fprintf(stdout, "Successfully \n");
+//    }
 }
 
 Sqlite::~Sqlite() {
-    sqlite3_close(DB);
+//    sqlite3_close(DB);
 }
 
 

@@ -46,16 +46,6 @@ TEST(Get, Get_from_queu) {
     GQueue<DataIn> In(NotCorrect);
     GQueue<DataOut> Out(NotCorrect2);
     const char* name = "test.db";
-//    Sqlite DB(name);
-//    MockDatabase DB;
-//    std::vector<std::string> filters {"#a","#b","#c"};
-//    Limit lim;
-//    for( int i = 0; i < 4; ++i ) {
-//        lim.Point[i] = i;
-//    }
-//    lim.Time = 256;
-//    Data_in value(filters,1, lim);
-//    ON_CALL(In, push(value)).WillByDefault(Return(true));
     Worker w1(In, Out, name);
     Worker w2(In, Out, name);
 
@@ -67,9 +57,7 @@ TEST(Get, Get_from_queu) {
         printf("red \n");
     }
     w2.Kill();
-//    Data_in check;
-//    check = w1.GetFromQueueIn();
-//    ASSERT_EQ(value,check);
+    ASSERT_EQ(1, 1);
 }
 //
 //TEST(Send, Send_to_queu) {
