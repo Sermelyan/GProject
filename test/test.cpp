@@ -142,7 +142,7 @@ class ServerTest : public ::testing::Test {
 
 TEST_F(ServerTest, EchoTest) {
     Server s(nullptr, nullptr, 6666);
-    std::thread server_thr(std::bind(&Server::StartServer, &s));
+    std::thread server_thr(std::bind(&Server::StartEchoServer, &s));
     boost::this_thread::sleep(boost::posix_time::millisec(100));
     std::string str("Test echo string!");
     SyncClient c;

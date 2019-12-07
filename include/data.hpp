@@ -16,8 +16,7 @@ typedef std::pair<double, double> Point;
 typedef std::vector<Point> Points;
 typedef std::vector<std::string> Filters;
 
-struct DataIn
-        {
+struct DataIn {
     Filters FilterList;
     unsigned TimeLimit;
     unsigned MaxDots;
@@ -25,7 +24,8 @@ struct DataIn
     Point EndPoint;
     int UserID;
     DataIn() {}
-    DataIn(::Filters _f, unsigned _t, unsigned _md, Point _sp, Point _ep, int _u)
+    DataIn(::Filters _f, unsigned _t, unsigned _md, Point _sp, Point _ep,
+           int _u)
         : FilterList(_f),
           TimeLimit(_t),
           MaxDots(_md),

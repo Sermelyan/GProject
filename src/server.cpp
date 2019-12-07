@@ -6,7 +6,8 @@
 #include <boost/thread.hpp>
 #include "data.hpp"
 
-Server::Server(Queue<DataIn> const *_in, Queue<DataOut> const *_out, unsigned Port)
+Server::Server(Queue<DataIn> const *_in, Queue<DataOut> const *_out,
+               unsigned Port)
     : in(_in),
       out(_out),
       alive(true),
