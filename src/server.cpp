@@ -6,73 +6,97 @@
 #include <boost/thread.hpp>
 #include "data.hpp"
 
-Server::Server(Queue<DataIn> const *_in, Queue<DataOut> const *_out,
+Server::Server(GQueue<DataIn> const *_in, GQueue<DataOut> const *_out,
                unsigned Port)
     : in(_in),
       out(_out),
       alive(true),
-      port(Port)
-/*acceptor(service, boost::asio::ip::tcp::endpoint(
-                      boost::asio::ip::tcp::v4(), Port))*/
-{
-    std::cout << "This constructor is working!" << std::endl;
-}
+      port(Port),
+      acceptor(service, boost::asio::ip::tcp::endpoint(
+                            boost::asio::ip::tcp::v4(), Port)) {}
 
-Server::~Server() { std::cout << "This destructor is working!" << std::endl; }
+Server::~Server() = default;
 
 void Server::Kill() { alive = false; }
 
-void Server::StartServer() {}
+void Server::StartServer() {
+    startAccept();
+    for (int i = 0; i < 4; ++i)
+        threads.emplace_back(
+            boost::bind(&boost::asio::io_service::run, &service));
+    for (auto &thread : threads) thread.join();
+}
 
 void Server::StartEchoServer() {
-    std::cout << "This start is working!" << std::endl;
     threads.emplace_back(std::bind(&Server::sillyServer, this));
     for (auto &thread : threads) {
         thread.join();
     }
 }
 
-void Server::startAccept() {}
+void Server::startAccept() {
+    std::shared_ptr<Client> c(new Client(service, in));
+    acceptor.async_accept(c->Sock(),
+                          std::bind(&Server::onAccept, this, c,
+                                    boost::asio::placeholders::error));
+}
 
-void Server::onAccept() {}
+void Server::onAccept(std::shared_ptr<Client> c, const error_code &e) {
+    if (e) return;
+    c->Read();
+    startAccept();
+}
 
-void Server::startSend() {}
-
-void Server::onSend() {}
-
-DataOut Server::GetFromQueue() {}
+DataOut Server::GetFromQueue() {
+    while (alive) {
+        auto data = out->popIfNotEmpty();
+        if (data.UserID == -1) {
+            boost::this_thread::sleep(boost::posix_time::millisec(100));
+        } else {
+            std::unique_ptr<Client> c;
+            for (auto waitingClient : waitingClients) {
+                c = waitingClient;
+            }
+            c->Write(data);
+        }
+    }
+}
 
 void Server::sillyServer() {
-    std::cout << "This tread is working!" << std::endl;
-    acceptor = new boost::asio::ip::tcp::acceptor(
-        service,
-        boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port));
     while (alive) {
-        std::cout << "This tread cycle is working!" << std::endl;
         boost::asio::ip::tcp::socket sock(service);
-        acceptor->accept(sock);
+        acceptor.accept(sock);
         std::cout << "Server: Aviable bytes: " << sock.available() << std::endl;
         char buff[1024];
         auto bytes = sock.receive(boost::asio::buffer(buff));
-        std::cout << "Server: Received bytes: " << bytes << " " << buff
-                  << std::endl;
-        std::cout << "Server: Got: " << buff << std::endl;
-        sock.write_some(boost::asio::buffer(buff));
+        std::cout << "Server: Received bytes: " << bytes << std::endl;
+        sock.write_some(boost::asio::buffer(buff, bytes));
         sock.close();
     }
 }
 
 // Client
 
-Client::Client(boost::asio::io_service &io) {}
+Client::Client(boost::asio::io_service &io, GQueue<DataIn> const *_in)
+    : sock(io), in(_in) {}
 
 Client::~Client() = default;
 
-void Client::Read() {}
+boost::asio::ip::tcp::socket &Client::Sock() { return sock; }
+
+void Client::Read() {
+    sock.async_receive(boost::asio::buffer(buffer),
+                       boost::bind(&Client::handleRead, this, buffer,
+                                   boost::asio::placeholders::error));
+}
 
 void Client::Write(const DataOut &out) {}
 
-void Client::handleRead(const boost::system::error_code &e) {}
+void Client::handleRead(std::string data, const boost::system::error_code &e) {
+    if (e) return;
+    auto unmarshaled = unmarshal(data);
+    in->push(*unmarshaled);
+}
 
 void Client::handleWrite(const boost::system::error_code &e) {}
 
@@ -104,5 +128,3 @@ std::string Client::marshal(const DataOut &out) {
     decoded.set_userid(out.UserID);
     return decoded.SerializeAsString();
 }
-
-void Client::sendToQueue(const DataIn &data) {}

@@ -104,22 +104,20 @@ class SyncClient {
     SyncClient() : sock(service) {
         sock.connect(boost::asio::ip::tcp::endpoint(
             boost::asio::ip::address::from_string("127.0.0.1"), 6666));
-        std::cout << "Client constructor is working " << std::endl;
     }
 
-    virtual ~SyncClient() { sock.close(); }
+    virtual ~SyncClient() { sock.close(); };
 
     void Write(const std::string& msg) {
-        std::cout << "Client: Prepare Send: " << msg << std::endl;
         auto bytes = sock.send(boost::asio::buffer(msg));
         std::cout << "Client: Send bytes: " << bytes << std::endl;
-        std::cout << "Client: Send: " << msg << std::endl;
     }
 
     std::string Read() {
         char buf[1024];
-        sock.receive(boost::asio::buffer(buf));
-        return buf;
+        auto bytes = sock.receive(boost::asio::buffer(buf));
+        std::cout << "Client: Got bytes: " << bytes << std::endl;
+        return std::string(buf, bytes);
     }
 
    private:
@@ -127,20 +125,7 @@ class SyncClient {
     boost::asio::ip::tcp::socket sock;
 };
 
-class ServerTest : public ::testing::Test {
-   protected:
-    //    Server* s;
-    //    void SetUp() override {
-    //        s = new Server(nullptr, nullptr, 6666);
-    //        s->StartServer();
-    //    }
-    //    void TearDown() override {
-    //        s->Kill();
-    //        delete(s);
-    //    }
-};
-
-TEST_F(ServerTest, EchoTest) {
+TEST_F(ClientTest, EchoTest1) {
     Server s(nullptr, nullptr, 6666);
     std::thread server_thr(std::bind(&Server::StartEchoServer, &s));
     boost::this_thread::sleep(boost::posix_time::millisec(100));
@@ -151,7 +136,19 @@ TEST_F(ServerTest, EchoTest) {
     s.Kill();
     server_thr.join();
     ASSERT_EQ(str, ans);
-    std::cout << "Message get: " << ans << std::endl;
+}
+
+TEST_F(ClientTest, EchoTest2) {
+    Server s(nullptr, nullptr, 6666);
+    std::thread server_thr(std::bind(&Server::StartEchoServer, &s));
+    s.StartEchoServer();
+    boost::this_thread::sleep(boost::posix_time::millisec(100));
+    SyncClient c;
+    c.Write(in_bytes);
+    std::string ans = c.Read();
+    s.Kill();
+    server_thr.join();
+    ASSERT_EQ(in_bytes, ans);
 }
 
 int main(int argc, char** argv) {

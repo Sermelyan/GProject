@@ -24,29 +24,28 @@ class Client {
    public:
     int user_id;
 
-    explicit Client(boost::asio::io_service &io);
-    Client() = default;
+    explicit Client(boost::asio::io_service &io, GQueue<DataIn> const *in);
     ~Client();
     void Read();
     void Write(const DataOut &out);
+    boost::asio::ip::tcp::socket &Sock();
 
    private:
     friend class ClientAdapter;
-    boost::asio::ip::tcp::socket *sock;
+    boost::asio::ip::tcp::socket sock;
+    GQueue<DataIn> &in;
     char buffer[1024];
 
-    void handleRead(const boost::system::error_code &e);
+    void handleRead(std::string data, const boost::system::error_code &e);
     void handleWrite(const boost::system::error_code &e);
 
     static std::unique_ptr<DataIn> unmarshal(const std::string &buffer);
     static std::string marshal(const DataOut &out);
-
-    void sendToQueue(const DataIn &data);
 };
 
 class Server {
    public:
-    Server(Queue<DataIn> const *in, Queue<DataOut> const *out, unsigned Port);
+    Server(GQueue<DataIn> const *in, GQueue<DataOut> const *out, unsigned Port);
     ~Server();
 
     void Kill();
@@ -55,18 +54,18 @@ class Server {
 
    private:
     std::vector<std::thread> threads;
-    std::vector<std::unique_ptr<Client>> waitingClients;
+    std::vector<std::shared_ptr<Client>> waitingClients;
     boost::asio::io_service service;
-    boost::asio::ip::tcp::acceptor *acceptor;
-    Queue<DataIn> const *in;
-    Queue<DataOut> const *out;
+    boost::asio::ip::tcp::acceptor acceptor;
+    GQueue<DataIn> &in;
+    GQueue<DataOut> &out;
     bool alive;
     unsigned port;
 
     void startAccept();
-    void onAccept();
-    void startSend();
-    void onSend();
+    void onAccept(std::shared_ptr<Client> c, const error_code &e);
+    void onSend(std::shared_ptr<Client> c, const DataOut &out,
+                const error_code &e);
 
     void sillyServer();
 
