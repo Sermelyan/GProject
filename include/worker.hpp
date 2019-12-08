@@ -7,7 +7,7 @@
 #include "sqlite-autoconf-3300100/sqlite3.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "queu.hpp"
+#include "queue.hpp"
 #include "algorithm.hpp"
 #include <thread>
 #include "Data.hpp"

@@ -1,5 +1,5 @@
 #include "worker.hpp"
-#include "queu.hpp"
+#include "queue.hpp"
 
 
 Worker::Worker(GQueue<DataIn> &in, GQueue<DataOut> &out, const char *DBName):In(in), Out(out), DB(DBName), Stop(false), WProces(std::bind(&Worker::WorkerProcess, this)) {
