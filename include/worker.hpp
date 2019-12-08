@@ -21,11 +21,11 @@
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 
-struct Point
-{
-    double X;
-    double  Y;
-};
+//struct Point
+//{
+//    double X;
+//    double  Y;
+//};
 
 namespace http = boost::beast::http;
 
