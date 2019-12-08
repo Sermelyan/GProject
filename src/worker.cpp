@@ -35,14 +35,14 @@ void Worker::GetDotsFromDB(const DataIn &value, std::vector<Point> &points){
     DB.Select(SqlRequest, points);
 }
 
-void Worker::GetRibsFromAPI(const std::vector<Point> &points){
-    for ( int i = 0; i < points.size(); ++i ) {
-        for(int j = 0; j < points.size() - 1; ++j ) {
-            weightArr.push_back(2);
-            edges.push_back(std::make_pair(i, j));
-        }
-    }
-}
+//void Worker::GetRibsFromAPI(const std::vector<Point> &points){
+//    for ( int i = 0; i < points.size(); ++i ) {
+//        for(int j = 0; j < points.size() - 1; ++j ) {
+//            weightArr.push_back(2);
+//            edges.push_back(std::make_pair(i, j));
+//        }
+//    }
+//}
 
 void Worker::GetRoute(const std::vector<std::pair<size_t,size_t>>  edge, const std::vector<size_t> weight,
                       std::pair<std::vector<int>, size_t> &res, size_t num_dots, DataIn value){
@@ -162,8 +162,8 @@ std::string Worker::createJsonForSending(const std::vector<Point> &points) {
     boost::property_tree::ptree coordinate;
 
     for (size_t i = 0 ; i < points.size() ; i++) {
-        coordinate.put("X", points.at(i).X);
-        coordinate.put("Y", points.at(i).Y);
+        coordinate.put("X", points.at(i).first);
+        coordinate.put("Y", points.at(i).second);
         // id координаты = её место в принимающем векторе
         std::string id = std::to_string(i);
         coordinates.add_child( id, coordinate);
