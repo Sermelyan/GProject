@@ -49,14 +49,14 @@ TEST(Get, Get_from_queu) {
     Worker w1(In, Out, name);
     Worker w2(In, Out, name);
 
-    for ( int i = 0; i < 100; i++ ){
-        printf("white ");
-    }
-    w1.Kill();
-    for ( int i = 0; i < 100; i++ ){
-        printf("red \n");
-    }
-    w2.Kill();
+//    for ( int i = 0; i < 100; i++ ){
+//        printf("white ");
+//    }
+//    w1.Kill();
+//    for ( int i = 0; i < 100; i++ ){
+//        printf("red ");
+//    }
+//    w2.Kill();
     ASSERT_EQ(1, 1);
 }
 //
