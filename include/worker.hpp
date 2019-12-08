@@ -12,6 +12,26 @@
 #include <thread>
 #include "Data.hpp"
 
+// worker API
+#include <list>
+#include <sstream>
+#include <boost/beast.hpp>
+#include <boost/asio/connect.hpp>
+#include <boost/asio/ip/tcp.hpp>
+#include <boost/property_tree/json_parser.hpp>
+#include <boost/property_tree/ptree.hpp>
+
+struct Point
+{
+    double X;
+    double  Y;
+};
+
+namespace http = boost::beast::http;
+
+// worker API end
+
+
 //struct PointW
 //{
 //    int id;
@@ -53,8 +73,8 @@ private:
     GQueue<DataIn> &In;
     GQueue<DataOut> &Out;
     bool Stop;
-    std::vector<std::pair<size_t,size_t>>  edges; // вектор из 2 точек
-    std::vector<size_t> weightArr; // вес ребра
+    // Alex delete std::vector<std::pair<size_t,size_t>>  edges; // вектор из 2 точек
+    // Alex delete std::vector<size_t> weightArr; // вес ребра
     std::thread WProces;
     DataIn GetFromQueueIn();
     void SendToQueueOut(const DataOut &value);
@@ -64,8 +84,33 @@ private:
             std::pair<std::vector<int>, size_t> &res, size_t num_dots, DataIn value);
     void FinalPoints(std::vector<Point> &points, const std::pair<std::vector<int>, size_t> &res);
     void WorkerProcess();
+    
+    // worker API
+    
+    // USE IT FROM ALGO!!!!!!!
+    typedef std::size_t dotId;
+    typedef std::pair<dotId, dotId> edge;
+    typedef std::size_t weight;
+    
+    // храним в этих векторах данные, которые получим из API
+    std::vector<edge>  edges;
+    std::vector<weight> weightArr;
+
+    const size_t MAX_POINT_COUNT = 500;
+    const size_t MIN_POINT_COUNT = 3;
+    void getWeightFromPythonAPI(const std::string &jsonPoints, std::string &answer);
+    std::string createJsonForSending(const std::vector<Point> &points);
+    void setJsonAnswerInClass(const std::string &answer, const size_t &pointCount);
+    // worker API end
+    
+    
 
 public:
+    
+    // worker API
+    static long int getWeightIndex(const size_t &pointsCount, const size_t &from, const size_t &to);
+    // worker API end
+    
     Worker(GQueue<DataIn> &in, GQueue<DataOut> &out, const char * DBName);
     ~Worker();
     void Kill();
