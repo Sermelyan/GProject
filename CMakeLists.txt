@@ -8,9 +8,7 @@ IF (Boost_FOUND)
 ENDIF()
 
 find_package(Protobuf)
-IF (Protobuf_FOUND)
-    include_directories(${PROTOBUF_INCLUDE_DIR})
-ENDIF()
+include_directories(${PROTOBUF_INCLUDE_DIR})
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
@@ -34,13 +32,8 @@ set(CMAKE_CXX_STANDARD 17)
 #set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
 
 include_directories(include)
-IF(Protobuf_FOUND)
-    protobuf_generate_cpp(PROTO_SRC PROTO_HEADER protobuf/structures.proto)
-ELSE()
-    set(PROTO_HEADER include/structures.pb.h)
-    set(PROTO_SRC src/structures.pb.cc)
-endif()
 
+protobuf_generate_cpp(PROTO_SRC PROTO_HEADER protobuf/structures.proto)
 add_library(proto ${PROTO_HEADER} ${PROTO_SRC})
 
 add_library(algorithm STATIC src/algorithm.cpp)
@@ -53,8 +46,4 @@ target_link_libraries(server proto ${Boost_LIBRARIES})
 add_library(worker STATIC src/worker.cpp)
 
 add_executable(test test/test.cpp)
-IF(Protobuf_FOUND)
-    target_link_libraries(test gtest gmock server proto ${PROTOBUF_LIBRARY})
-ELSE()
-    target_link_libraries(test gtest gmock server proto)
-ENDIF()
+target_link_libraries(test gtest gmock server proto ${PROTOBUF_LIBRARY})

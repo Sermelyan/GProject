@@ -70,9 +70,10 @@ class ClientTest : public ::testing::Test {
 
         Data::Out protoOut;
         for (auto&& i : out.RoutePoints) {
-            auto sp = protoOut.add_routepoints();
+            auto sp = new Data::Point;
             sp->set_x(i.first);
             sp->set_y(i.second);
+            protoOut.set_allocated_routepoints(sp);
         }
         protoOut.set_maxtime(out.MaxTime);
         protoOut.set_userid(out.UserID);

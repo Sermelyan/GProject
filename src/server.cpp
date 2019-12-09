@@ -131,9 +131,10 @@ std::unique_ptr<DataIn> Client::unmarshal(const std::string &buffer) {
 std::string Client::marshal(const DataOut &out) {
     Data::Out decoded;
     for (auto &&i : out.RoutePoints) {
-        auto t = decoded.add_routepoints();
+        auto t = new Data::Point;
         t->set_x(i.first);
         t->set_y(i.second);
+        decoded.set_allocated_routepoints(t);
     }
     decoded.set_maxtime(out.MaxTime);
     decoded.set_userid(out.UserID);
