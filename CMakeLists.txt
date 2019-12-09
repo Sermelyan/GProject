@@ -7,8 +7,10 @@ IF (Boost_FOUND)
     ADD_DEFINITIONS( "-DHAS_BOOST" )
 ENDIF()
 
-find_package(Protobuf REQUIRED)
-include_directories(${PROTOBUF_INCLUDE_DIR})
+find_package(Protobuf)
+IF (Protobuf_FOUND)
+    include_directories(${PROTOBUF_INCLUDE_DIR})
+ENDIF()
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
@@ -25,15 +27,20 @@ ${CMAKE_BINARY_DIR}/googletest-build)
 
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g ")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ftest-coverage")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g ")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ftest-coverage")
+#set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
 
 include_directories(include)
+IF(Protobuf_FOUND)
+    protobuf_generate_cpp(PROTO_SRC PROTO_HEADER protobuf/structures.proto)
+ELSE()
+    set(PROTO_HEADER protobuf/structures.pb.h)
+    set(PROTO_SRC protobuf/structures.pb.cc)
+endif()
 
-protobuf_generate_cpp(PROTO_SRC PROTO_HEADER protobuf/structures.proto)
 add_library(proto ${PROTO_HEADER} ${PROTO_SRC})
 
 add_library(algorithm STATIC src/algorithm.cpp)

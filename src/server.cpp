@@ -15,9 +15,16 @@ Server::Server(GQueue<DataIn>& _in, GQueue<DataOut>& _out,
       acceptor(service, boost::asio::ip::tcp::endpoint(
                             boost::asio::ip::tcp::v4(), Port)) {}
 
-Server::~Server() = default;
+Server::~Server() {
+    for (auto &thread : threads) {
+        thread.join();
+    }
+}
 
-void Server::Kill() { alive = false; }
+void Server::Kill() {
+    const std::lock_guard<std::mutex> lock(liveMutex);
+    alive = false;
+}
 
 void Server::StartServer() {
 //    startAccept();
@@ -29,13 +36,10 @@ void Server::StartServer() {
 
 void Server::StartEchoServer() {
     threads.emplace_back(std::bind(&Server::sillyServer, this));
-    for (auto &thread : threads) {
-        thread.join();
-    }
 }
 
 void Server::startAccept() {
-    if (!alive)
+    if (!isAlive())
         return;
     std::shared_ptr<Client> c(new Client(service, in));
 //    acceptor.async_accept(c->Sock(),
@@ -65,7 +69,7 @@ DataOut Server::GetFromQueue() {
 }
 
 void Server::sillyServer() {
-    while (alive) {
+    while (isAlive()) {
         boost::asio::ip::tcp::socket sock(service);
         acceptor.accept(sock);
         std::cout << "Server: Aviable bytes: " << sock.available() << std::endl;
@@ -75,6 +79,11 @@ void Server::sillyServer() {
         sock.write_some(boost::asio::buffer(buff, bytes));
         sock.close();
     }
+}
+
+bool Server::isAlive() {
+    const std::lock_guard<std::mutex> lock(liveMutex);
+    return alive;
 }
 
 // Client

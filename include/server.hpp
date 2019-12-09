@@ -24,14 +24,14 @@ class Client {
    public:
     int user_id;
 
+    friend class ClientAdapter;
     explicit Client(boost::asio::io_service &io, GQueue<DataIn> &in);
     ~Client();
     void Read();
     void Write(const DataOut &out);
-    boost::asio::ip::tcp::socket &Sock();
 
-   private:
-    friend class ClientAdapter;
+    boost::asio::ip::tcp::socket &Sock();
+private:
     boost::asio::ip::tcp::socket sock;
     GQueue<DataIn> &in;
     char buffer[1024];
@@ -62,10 +62,13 @@ class Server {
     bool alive;
     unsigned port;
 
+    std::mutex liveMutex;
+
     void startAccept();
     void onAccept(std::shared_ptr<Client> c, const boost::system::error_code &e);
     void onSend(std::shared_ptr<Client> c, const DataOut &out,
                 const boost::system::error_code &e);
+    bool isAlive();
 
     void sillyServer();
 

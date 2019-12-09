@@ -14,16 +14,21 @@
 
 class ClientAdapter {
    private:
-    Client c;
+    Client *c;
+    boost::asio::io_service service;
 
    public:
-    ClientAdapter(GQueue<DataIn>& _in) : c(boost::asio::io_service, _in) {}
-    ~ClientAdapter() = default;
+    explicit ClientAdapter(GQueue<DataIn>& _in) {
+        c = new Client(service, _in);
+    }
+    ~ClientAdapter() {
+        delete(c);
+    }
 
     std::unique_ptr<DataIn> Unmarshal(const std::string& buffer) {
-        return c.unmarshal(buffer);
+        return c->unmarshal(buffer);
     }
-    std::string Marshal(const DataOut& out) { return c.marshal(out); }
+    std::string Marshal(const DataOut& out) { return c->marshal(out); }
 };
 
 class ClientTest : public ::testing::Test {
@@ -81,18 +86,17 @@ class ClientTest : public ::testing::Test {
 
     std::string in_bytes;
     std::string out_bytes;
-
-    GQueue<DataIn> QIn;
-    GQueue<DataOut> QOut;
 };
 
 TEST_F(ClientTest, MarshalTest) {
+    GQueue<DataIn> QIn((DataIn()));
     ClientAdapter c(QIn);
     std::string marshaled(c.Marshal(out));
     ASSERT_EQ(marshaled, out_bytes);
 }
 
 TEST_F(ClientTest, UnmarshalTest) {
+    GQueue<DataIn> QIn((DataIn()));
     ClientAdapter c(QIn);
     auto in_test = c.Unmarshal(in_bytes);
     ASSERT_EQ(in_test->FilterList, in.FilterList);
@@ -109,7 +113,10 @@ class SyncClient {
             boost::asio::ip::address::from_string("127.0.0.1"), 6666));
     }
 
-    virtual ~SyncClient() { sock.close(); };
+    ~SyncClient() {
+        if (sock.is_open())
+            sock.close();
+    }
 
     void Write(const std::string& msg) {
         auto bytes = sock.send(boost::asio::buffer(msg));
@@ -129,6 +136,8 @@ class SyncClient {
 };
 
 TEST_F(ClientTest, EchoTest1) {
+    GQueue<DataIn> QIn((DataIn()));
+    GQueue<DataOut> QOut((DataOut()));
     Server s(QIn, QOut, 6666);
     std::thread server_thr(std::bind(&Server::StartEchoServer, &s));
     boost::this_thread::sleep(boost::posix_time::millisec(100));
@@ -142,13 +151,14 @@ TEST_F(ClientTest, EchoTest1) {
 }
 
 TEST_F(ClientTest, EchoTest2) {
+    GQueue<DataIn> QIn((DataIn()));
+    GQueue<DataOut> QOut((DataOut()));
     Server s(QIn, QOut, 6666);
     std::thread server_thr(std::bind(&Server::StartEchoServer, &s));
-    s.StartEchoServer();
     boost::this_thread::sleep(boost::posix_time::millisec(100));
     SyncClient c;
     c.Write(in_bytes);
-    std::string ans = c.Read();
+    std::string ans(c.Read());
     s.Kill();
     server_thr.join();
     ASSERT_EQ(in_bytes, ans);
