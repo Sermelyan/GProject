@@ -526,7 +526,8 @@ void WireFormatLite::WriteMessage(int field_number, const MessageLite& value,
 
 void WireFormatLite::WriteSubMessageMaybeToArray(
     int size, const MessageLite& value, io::CodedOutputStream* output) {
-  output->SetCur(value._InternalSerialize(output->Cur(), output->EpsCopy()));
+  output->SetCur(value.InternalSerializeWithCachedSizesToArray(
+      output->Cur(), output->EpsCopy()));
 }
 
 void WireFormatLite::WriteGroupMaybeToArray(int field_number,

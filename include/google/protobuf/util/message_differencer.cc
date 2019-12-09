@@ -42,6 +42,7 @@
 #include <google/protobuf/stubs/logging.h>
 #include <google/protobuf/stubs/common.h>
 #include <google/protobuf/stubs/stringprintf.h>
+#include <google/protobuf/any.h>
 #include <google/protobuf/io/printer.h>
 #include <google/protobuf/io/zero_copy_stream.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
@@ -308,11 +309,6 @@ void MessageDifferencer::set_repeated_field_comparison(
   repeated_field_comparison_ = comparison;
 }
 
-MessageDifferencer::RepeatedFieldComparison
-MessageDifferencer::repeated_field_comparison() {
-  return repeated_field_comparison_;
-}
-
 void MessageDifferencer::CheckRepeatedFieldComparisons(
     const FieldDescriptor* field,
     const RepeatedFieldComparison& new_comparison) {
@@ -458,7 +454,7 @@ void MessageDifferencer::ReportDifferencesToString(std::string* output) {
 
 void MessageDifferencer::ReportDifferencesTo(Reporter* reporter) {
   // If an output string is set, clear it to prevent
-  // it superseding the specified reporter.
+  // it superceding the specified reporter.
   if (output_string_) {
     output_string_ = NULL;
   }
@@ -584,7 +580,7 @@ bool MessageDifferencer::Compare(const Message& message1,
                               *unknown_field_set2, parent_fields)) {
       if (reporter_ == NULL) {
         return false;
-      }
+      };
       unknown_compare_result = false;
     }
   }
@@ -865,7 +861,7 @@ bool MessageDifferencer::CompareWithFieldsInternal(
         parent_fields->pop_back();
       }
     }
-    // Increment the field indices.
+    // Increment the field indicies.
     ++field_index1;
     ++field_index2;
   }

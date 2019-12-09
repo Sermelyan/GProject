@@ -30,14 +30,12 @@
 
 #include <google/protobuf/util/internal/datapiece.h>
 
-#include <cmath>
-#include <limits>
-
 #include <google/protobuf/struct.pb.h>
 #include <google/protobuf/type.pb.h>
 #include <google/protobuf/descriptor.h>
 #include <google/protobuf/util/internal/utility.h>
 #include <google/protobuf/stubs/strutil.h>
+#include <google/protobuf/stubs/mathlimits.h>
 #include <google/protobuf/stubs/mathutil.h>
 
 namespace google {
@@ -45,6 +43,9 @@ namespace protobuf {
 namespace util {
 namespace converter {
 
+;
+;
+;
 using util::Status;
 using util::StatusOr;
 using util::error::Code;
@@ -98,9 +99,9 @@ StatusOr<double> FloatToDouble(float before) {
 }
 
 StatusOr<float> DoubleToFloat(double before) {
-  if (std::isnan(before)) {
+  if (MathLimits<double>::IsNaN(before)) {
     return std::numeric_limits<float>::quiet_NaN();
-  } else if (!std::isfinite(before)) {
+  } else if (!MathLimits<double>::IsFinite(before)) {
     // Converting a double +inf/-inf to float should just work.
     return static_cast<float>(before);
   } else if (before > std::numeric_limits<float>::max() ||
@@ -173,7 +174,7 @@ StatusOr<double> DataPiece::ToDouble() const {
     if (str_ == "-Infinity") return -std::numeric_limits<double>::infinity();
     if (str_ == "NaN") return std::numeric_limits<double>::quiet_NaN();
     StatusOr<double> value = StringToNumber<double>(safe_strtod);
-    if (value.ok() && !std::isfinite(value.ValueOrDie())) {
+    if (value.ok() && !MathLimits<double>::IsFinite(value.ValueOrDie())) {
       // safe_strtod converts out-of-range values to +inf/-inf, but we want
       // to report them as errors.
       return InvalidArgument(StrCat("\"", str_, "\""));
@@ -358,7 +359,7 @@ StatusOr<To> DataPiece::StringToNumber(bool (*func)(StringPiece,
   }
   To result;
   if (func(str_, &result)) return result;
-  return InvalidArgument(StrCat("\"", std::string(str_), "\""));
+  return InvalidArgument(StrCat("\"", string(str_), "\""));
 }
 
 bool DataPiece::DecodeBase64(StringPiece src, std::string* dest) const {

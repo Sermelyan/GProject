@@ -362,8 +362,8 @@ template <typename Type>
 inline uint8* MapTypeHandler<WireFormatLite::TYPE_MESSAGE, Type>::Write(
     int field, const MapEntryAccessorType& value, uint8* ptr,
     io::EpsCopyOutputStream* stream) {
-  ptr = stream->EnsureSpace(ptr);
-  return WireFormatLite::InternalWriteMessage(field, value, ptr, stream);
+  stream->EnsureSpace(&ptr);
+  return WireFormatLite::InternalWriteMessageToArray(field, value, ptr, stream);
 }
 
 #define WRITE_METHOD(FieldType, DeclaredType)                                  \
@@ -371,7 +371,7 @@ inline uint8* MapTypeHandler<WireFormatLite::TYPE_MESSAGE, Type>::Write(
   inline uint8* MapTypeHandler<WireFormatLite::TYPE_##FieldType, Type>::Write( \
       int field, const MapEntryAccessorType& value, uint8* ptr,                \
       io::EpsCopyOutputStream* stream) {                                       \
-    ptr = stream->EnsureSpace(ptr);                                            \
+    stream->EnsureSpace(&ptr);                                                 \
     return stream->Write##DeclaredType(field, value, ptr);                     \
   }
 
@@ -384,7 +384,7 @@ WRITE_METHOD(BYTES, Bytes)
   inline uint8* MapTypeHandler<WireFormatLite::TYPE_##FieldType, Type>::Write( \
       int field, const MapEntryAccessorType& value, uint8* ptr,                \
       io::EpsCopyOutputStream* stream) {                                       \
-    ptr = stream->EnsureSpace(ptr);                                            \
+    stream->EnsureSpace(&ptr);                                                 \
     return WireFormatLite::Write##DeclaredType##ToArray(field, value, ptr);    \
   }
 
@@ -467,11 +467,11 @@ inline const char* ReadSINT32(const char* ptr, int32* value) {
 }
 template <typename E>
 inline const char* ReadENUM(const char* ptr, E* value) {
-  *value = static_cast<E>(ReadVarint32(&ptr));
+  *value = static_cast<E>(ReadVarint(&ptr));
   return ptr;
 }
 inline const char* ReadBOOL(const char* ptr, bool* value) {
-  *value = static_cast<bool>(ReadVarint32(&ptr));
+  *value = static_cast<bool>(ReadVarint(&ptr));
   return ptr;
 }
 
