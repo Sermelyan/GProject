@@ -3,3 +3,5 @@
  */
 
 #include "queue.hpp"
+
+// template realization in header

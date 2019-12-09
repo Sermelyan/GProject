@@ -5,25 +5,25 @@
 #ifndef INCLUDE_QUEUE_HPP_
 #define INCLUDE_QUEUE_HPP_
 
-#include <memory>
-#include <mutex>
 #include <queue>
+#include <mutex>
+#include <memory>
 
 template <class T>
 class GQueue {
-   public:
+ public:
     GQueue() = delete;
     explicit GQueue(const T &element404);
     ~GQueue();
-    void push(const T &element);
-    T popIfNotEmpty();
+    void push(const  T &element);
+    T  popIfNotEmpty();
 
-    GQueue(const GQueue &) = delete;
-    GQueue(const GQueue &&) = delete;
-    GQueue &operator=(const GQueue &) = delete;
-    GQueue &operator=(const GQueue &&) = delete;
+    GQueue(const GQueue&) = delete;
+    GQueue(const GQueue&&) = delete;
+    GQueue& operator=(const GQueue&) = delete;
+    GQueue& operator=(const GQueue&&) = delete;
 
-   private:
+ private:
     T element404;
     std::unique_ptr<std::queue<T>> queue;
     std::mutex GQueueMutex;

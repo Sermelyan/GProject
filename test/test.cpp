@@ -1,10 +1,9 @@
 /*
- * Copyright 2019 <Copyright Owner>
+ * Copyright 2019 <alex>
  */
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <iostream>
 
 #include <boost/thread.hpp>
 #include "data.hpp"
@@ -163,9 +162,4 @@ TEST_F(ClientTest, EchoTest2) {
     s.Kill();
     server_thr.join();
     ASSERT_EQ(in_bytes, ans);
-}
-
-int main(int argc, char** argv) {
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
 }
