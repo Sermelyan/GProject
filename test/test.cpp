@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 <alex>
+ * Copyright 2019 <Sergey Melikyan>
  */
 
 #include <gmock/gmock.h>
@@ -162,4 +162,9 @@ TEST_F(ClientTest, EchoTest2) {
     s.Kill();
     server_thr.join();
     ASSERT_EQ(in_bytes, ans);
+}
+
+int main(int argc, char** argv) {
+    testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }

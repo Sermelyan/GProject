@@ -31,6 +31,6 @@ script:
 #  - ./linters/run.sh --local
   - mkdir build
   - cd build
-  - cmake ../
-  - make
+  - cmake -j2 ../
+  - make -j2
   - ./test

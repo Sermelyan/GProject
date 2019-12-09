@@ -56,5 +56,5 @@ include_directories(/usr/include)
 link_directories(/usr/lib)
 target_link_libraries(worker gtest gmock sqlite3)
 
-add_executable(test test/test.cpp src/worker.cpp)
-target_link_libraries(test gtest gmock server proto ${PROTOBUF_LIBRARY})
+add_executable(test test/test.cpp)
+target_link_libraries(test gtest gmock algorithm worker server proto ${PROTOBUF_LIBRARY})
