@@ -1,0 +1,23 @@
+syntax = "proto2";
+package Data;
+
+message Point {
+    optional double X = 1;
+    optional double Y = 2;
+}
+
+
+message In {
+    optional uint32 TimeLimit = 1;
+    repeated string Filters = 2;
+    optional uint32 MaxDots = 3;
+    optional Point StartPoint = 4;
+    optional Point EndPoint = 5;
+    optional uint32 UserID = 6;
+}
+
+message Out {
+    optional Point RoutePoints = 1;
+    optional uint32 MaxTime = 2;
+    optional uint32 UserID = 3;
+}

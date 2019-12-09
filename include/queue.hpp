@@ -29,15 +29,13 @@ class GQueue {
     std::mutex GQueueMutex;
 };
 
-
 template <class T>
-GQueue<T>::~GQueue() {
-}
+GQueue<T>::~GQueue() = default;
 
 template <class T>
 GQueue<T>::GQueue(const T &element404) {
     queue.reset(new std::queue<T>);
-    this->element404 =  element404;
+    this->element404 = element404;
 }
 
 template <class T>
