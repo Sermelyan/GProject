@@ -36,12 +36,12 @@ set(CMAKE_CXX_STANDARD 17)
 include_directories(include)
 IF(Protobuf_FOUND)
     protobuf_generate_cpp(PROTO_SRC PROTO_HEADER protobuf/structures.proto)
+    add_library(proto ${PROTO_HEADER} ${PROTO_SRC})
 ELSE()
-    set(PROTO_HEADER protobuf/structures.pb.h)
-    set(PROTO_SRC protobuf/structures.pb.cc)
-endif()
-
-add_library(proto ${PROTO_HEADER} ${PROTO_SRC})
+    add_library(proto STATIC IMPORTED)
+    set_property(TARGET proto PROPERTY
+            IMPORTED_LOCATION protobuf/libproto.a)
+ENDIF()
 
 add_library(algorithm STATIC src/algorithm.cpp)
 
@@ -53,4 +53,8 @@ target_link_libraries(server proto ${Boost_LIBRARIES})
 add_library(worker STATIC src/worker.cpp)
 
 add_executable(test test/test.cpp)
-target_link_libraries(test gtest gmock server proto ${PROTOBUF_LIBRARY})
+IF(Protobuf_FOUND)
+    target_link_libraries(test gtest gmock server proto ${PROTOBUF_LIBRARY})
+ELSE()
+    target_link_libraries(test gtest gmock server proto)
+ENDIF()
