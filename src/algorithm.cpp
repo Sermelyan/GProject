@@ -11,6 +11,7 @@
 #include <boost/graph/graph_traits.hpp>
 #include <assert.h>
 
+
 Algorithm::Algorithm(const std::vector<edge> &edges,
                      const std::vector<weight> &weights) {
 
