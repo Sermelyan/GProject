@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 <alex>
+ * Copyright 2019 <Alex>
  */
 
 #include <gtest/gtest.h>
