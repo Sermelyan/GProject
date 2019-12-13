@@ -2,15 +2,12 @@
  * Copyright 2019 <Alex>
  */
 
+
+#include <boost/graph/adjacency_list.hpp>
+
+
 #ifndef INCLUDE_ALGORITHM_HPP_
 #define INCLUDE_ALGORITHM_HPP_
-#include <utility>
-#include <vector>
-#include <unordered_set>
-#include <boost/graph/graph_traits.hpp>
-#include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/dijkstra_shortest_paths.hpp>
-#include <assert.h>
 
 
 class Algorithm {
@@ -47,9 +44,10 @@ class Algorithm {
 
  private:
     void MakeGraph();
-    edge * edgeArr;
+    std::unique_ptr<edge> edgeArr;
+    std::unique_ptr<weight> weightArr;
     size_t edgeSize;
-    weight * weightArr;
+
     graph_t myGraph;
     const size_t MAX_PLACES = 200;  // контроль (максимальное кол-во мест в пути)
 };

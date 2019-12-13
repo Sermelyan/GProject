@@ -4,27 +4,34 @@
 
 #include "algorithm.hpp"
 
+#include <unordered_set>
+#include <vector>
+#include <utility>
+#include <boost/graph/dijkstra_shortest_paths.hpp>
+#include <boost/graph/graph_traits.hpp>
+#include <assert.h>
+
 Algorithm::Algorithm(const std::vector<edge> &edges,
                      const std::vector<weight> &weights) {
 
     assert(edges.size() == weights.size());
 
     edgeSize = edges.size();
-    edgeArr = new edge[edgeSize];
-    weightArr = new weight[edgeSize];
+    edgeArr.reset(new edge[edgeSize]);
+    weightArr.reset(new weight[edgeSize]);
     for (size_t i = 0; i < edgeSize; i++) {
-        *(edgeArr+i) = edges.at(i);
-        *(weightArr+i)= weights.at(i);
+        *(edgeArr.get()+i) = edges.at(i);
+        *(weightArr.get()+i)= weights.at(i);
     }
 }
 
 Algorithm::~Algorithm() {
-    delete[]edgeArr;
-    delete[]weightArr;
+    edgeArr.reset(nullptr);
+    weightArr.reset(nullptr);
 }
 
 void Algorithm::MakeGraph() {
-    myGraph = graph_t(edgeArr, edgeArr + edgeSize, weightArr, edgeSize);
+    myGraph = graph_t(edgeArr.get(), edgeArr.get() + edgeSize, weightArr.get(), edgeSize);
     boost::property_map<graph_t, boost::edge_weight_t>::type weightGraph =
             get(boost::edge_weight, myGraph);
 }
@@ -72,6 +79,7 @@ std::pair<std::vector<Algorithm::dotId>, size_t>
 Algorithm::getRoute(Algorithm::dotId from, const size_t &pointsCount,
                     const size_t &time, const size_t &maxPlacesCount) {
 
+    // только для дебага, время и кол-во мест проверяет сервер
     assert(time > 0);
     assert(maxPlacesCount > 1);
 
@@ -96,7 +104,7 @@ Algorithm::getRoute(Algorithm::dotId from, const size_t &pointsCount,
         size_t startRibsIndexInEdges = (pointsCount-1) * from;
 
         //  получаем индекс, с которого находятся веса от нашей вершины
-        size_t weightIndex = getWeightIndex(pointsCount, from, edgeArr[startRibsIndexInEdges].second);
+        size_t weightIndex = getWeightIndex(pointsCount, from, edgeArr.get()[startRibsIndexInEdges].second);
 
         //  возможные пути из точки
         std::set< std::pair<dotId, size_t>, decltype(comp) > nextPointPretendents(comp);
@@ -105,12 +113,12 @@ Algorithm::getRoute(Algorithm::dotId from, const size_t &pointsCount,
         for (size_t i = 0 ; i < pointsCount -1 ; i++, weightIndex++) {
 
             // не рассматриваем посещенные точки
-            if ( visitedPints.find(edgeArr[startRibsIndexInEdges + i].second) != visitedPints.end() )
+            if ( visitedPints.find(edgeArr.get()[startRibsIndexInEdges + i].second) != visitedPints.end() )
                 continue;
 
             // сохраняем допустимую точку
-            nextPointPretendents.insert(std::make_pair(edgeArr[startRibsIndexInEdges + i].second,
-                                                          weightArr[weightIndex]));
+            nextPointPretendents.insert(std::make_pair(edgeArr.get()[startRibsIndexInEdges + i].second,
+                                                          weightArr.get()[weightIndex]));
         }
 
         //  ничего не добавили => всё обошли
