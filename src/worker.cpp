@@ -5,19 +5,21 @@
 #include "worker.hpp"
 
 
-void Worker::GetRibsFromAPI(const std::vector<Point> &points ) {
+bool Worker::GetRibsFromAPI(const std::vector<Point> &points ) {
 
     const size_t pointCount = points.size();
     if (pointCount < MIN_POINT_COUNT || pointCount > MAX_POINT_COUNT)
-        return;
+        return false;
 
     const std::string jsonForSending = createJsonForSending(points);
 
     std::string answer;
-    getWeightFromPythonAPI(jsonForSending, answer);
+
+    if ( !getWeightFromPythonAPI(jsonForSending, answer) )
+        return false;
 
     setJsonAnswerInClass(answer, pointCount);
-
+    return true;
 }
 
 
@@ -43,10 +45,8 @@ std::string Worker::createJsonForSending(const std::vector<Point> &points) {
 }
 
 
-void Worker::getWeightFromPythonAPI(const std::string &jsonPoints, std::string &answer) {
+bool Worker::getWeightFromPythonAPI(const std::string &jsonPoints, std::string &answer) {
 
-    const std::string host = "127.0.0.1";
-    const std::string target = "/api";
 
     boost::asio::io_context ioc;
 
@@ -55,7 +55,18 @@ void Worker::getWeightFromPythonAPI(const std::string &jsonPoints, std::string &
     boost::asio::ip::tcp::socket socket(ioc);
 
     //  установка соединения
-    boost::asio::connect(socket, resolver.resolve(host, "5000"));
+    try
+    {
+        boost::asio::connect(socket, resolver.resolve(host, "5000"));
+    }
+    catch (boost::system::system_error const& error)
+    {
+        std::cout << "Not connect: " << error.what() << std::endl;
+        return false;
+    }
+
+
+
 
     //  создаем запрос
     http::request<http::string_body> req(http::verb::post, target, 11);
@@ -89,6 +100,7 @@ void Worker::getWeightFromPythonAPI(const std::string &jsonPoints, std::string &
     answer = answerStream.str();
     size_t startJson = answer.find('{');
     answer.erase(0, startJson);
+    return true;
 }
 
 void Worker::setJsonAnswerInClass(const std::string &json, const size_t &pointCount){
@@ -125,4 +137,9 @@ long int Worker::getWeightIndex(const size_t &pointsCount, const size_t &from, c
 
     return ( (pointsCount -1) * from + to);
 
+}
+
+void  Worker::setHostTarget(const std::string &host, const std::string &target) {
+    this->host = host;
+    this->target = target;
 }

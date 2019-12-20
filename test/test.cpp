@@ -9,6 +9,9 @@
 TEST(global, distance) {
 
     Worker worker;
+    const std::string host = "127.0.0.1";
+    const std::string target = "/api";
+    worker.setHostTarget(host, target);
     std::vector<Point> points;
     points.push_back( Point{3.2,4.5} );
     points.push_back( Point{102.0,-4.7} );
@@ -17,7 +20,11 @@ TEST(global, distance) {
     points.push_back( Point{-7.3,19.1} );
     points.push_back( Point{-45.4,-182} );
 
-    worker.GetRibsFromAPI(points);
+    if (!worker.GetRibsFromAPI(points) ) {
+        std::cout<<"\n===API server rip!===\n\n";
+        return;
+    }
+
 
     size_t index;
 
@@ -168,7 +175,10 @@ TEST(PythonAPI, PythonAPI) {
     std::string jsonForSending = "{\"coordinates\": {\"0\": {\"X\": \"3.2\",\"Y\": \"4.5\"},\"1\": {\"X\": \"102\",\"Y\": \"-4.7\"},\"2\": {\"X\": \"-7\",\"Y\": \"1.39\"}}}";
     std::string answer;
 
-    worker.getWeightFromPythonAPI(jsonForSending, answer);
+    if ( !worker.getWeightFromPythonAPI(jsonForSending, answer)) {
+        std::cout<<"\n===API server rip!===\n\n";
+        return;
+    }
 
     std::string goodAnswer = "{\"weights\":{\"0->1\":99,\"0->2\":10,\"1->0\":99,\"1->2\":109,\"2->0\":10,\"2->1\":109}}\n";
 

@@ -15,6 +15,7 @@
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 
+#include <iostream>
 
 struct Point
 {
@@ -40,8 +41,11 @@ public:  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! PRIVATE AFTER TESTS !
     const size_t MAX_POINT_COUNT = 500;
     const size_t MIN_POINT_COUNT = 3;
 
-    void GetRibsFromAPI(const std::vector<Point> &points);
-    void getWeightFromPythonAPI(const std::string &jsonPoints, std::string &answer);
+    std::string host = "127.0.0.1";
+    std::string target = "/api";
+    void setHostTarget(const std::string &host, const std::string &target);
+    bool GetRibsFromAPI(const std::vector<Point> &points);
+    bool getWeightFromPythonAPI(const std::string &jsonPoints, std::string &answer);
     std::string createJsonForSending(const std::vector<Point> &points);
     void setJsonAnswerInClass(const std::string &answer, const size_t &pointCount);
 
