@@ -1,7 +1,6 @@
-/*
- * Copyright 2019 <alex>
- */
-/*
+//
+// Created by alex on 21/12/2019.
+//
 #include <gtest/gtest.h>
 #include "worker.hpp"
 #include <iostream>
@@ -9,6 +8,7 @@
 #include <thread>
 #include "algorithm.hpp"
 #include <string>  // only for demonstrate display places names
+
 
 
 // QUEUE TESTS START
@@ -718,9 +718,7 @@ TEST(test6getRoute, algorithm) {
 
 // ALGO TEST END
 
+int allTest(){
 
-int main(int argc, char** argv) {
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+    return  RUN_ALL_TESTS();
 }
-*/
