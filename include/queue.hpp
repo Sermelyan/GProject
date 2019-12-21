@@ -5,13 +5,14 @@
 #ifndef INCLUDE_QUEUE_HPP_
 #define INCLUDE_QUEUE_HPP_
 
+
 #include <queue>
 #include <mutex>
 #include <memory>
 
 template <class T>
 class GQueue {
- public:
+public:
     GQueue() = delete;
     explicit GQueue(const T &element404);
     ~GQueue();
@@ -23,21 +24,19 @@ class GQueue {
     GQueue& operator=(const GQueue&) = delete;
     GQueue& operator=(const GQueue&&) = delete;
 
- private:
+private:
     T element404;
     std::unique_ptr<std::queue<T>> queue;
     std::mutex GQueueMutex;
 };
 
-
 template <class T>
-GQueue<T>::~GQueue() {
-}
+GQueue<T>::~GQueue() = default;
 
 template <class T>
 GQueue<T>::GQueue(const T &element404) {
     queue.reset(new std::queue<T>);
-    this->element404 =  element404;
+    this->element404 = element404;
 }
 
 template <class T>

@@ -1,31 +1,18 @@
-#ifndef INCLUDE_WORKER_HPP_
-#define INCLUDE_WORKER_HPP_
-
 #include <string>
+#include <utility>
 #include <vector>
 #include <map>
-#include "sqlite-autoconf-3300100/sqlite3.h"
+//#include "sqlite-autoconf-3300100/sqlite3.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "queue.hpp"
 #include "algorithm.hpp"
 #include <thread>
 #include "Data.hpp"
+#include <fstream>
 
-//struct PointW
-//{
-//    int id;
-//    std::vector<std::string> tags;
-//    double X;
-//    double  Y;
-//    bool operator== (Point &R){
-//        if (this->id == R.id && this->tags == R.tags && this->X == R.X && this->Y == R.Y){
-//            return true;
-//        }
-//        return false;
-//    }
-//};
-
+#ifndef INCLUDE_WORKER_HPP_
+#define INCLUDE_WORKER_HPP_
 
 struct Limit
 {
@@ -34,22 +21,32 @@ struct Limit
     int Time;
 };
 
-class Sqlite {
- private:
-    sqlite3* DB = 0;
-    char *zErrMsg = 0;
-    int rc;
+struct Line {
+    int id;
+    std::string Name;
+    double x;
+    double y;
+    std::vector<std::string>Tags;
+    Line(int ID, std::string n, double X, double Y, std::vector<std::string>T): id(ID), Name(std::move(n)), x(X), y(Y), Tags(std::move(T)){};
+    Line(): id(0), Name("name"), x(0), y(0), Tags({}){};
+};
+
+class Table {
  public:
-    void Select(std::string sql, std::vector<Point> res);
-    Sqlite(const char * filename);
-    virtual ~Sqlite();
+    std::ifstream file;
+    std::vector<Line> table;
+ public:
+    void SelectTag(std::vector<std::string> values, std::vector<Point>& res);
+    void SelectAll(std::vector<Point>& res);
+    Table(std::string filename);
+    virtual ~Table();
 };
 
 class Worker
 {
 private:
     DataIn request;
-    Sqlite DB;
+    Table DB;
     GQueue<DataIn> &In;
     GQueue<DataOut> &Out;
     bool Stop;
@@ -66,7 +63,7 @@ private:
     void WorkerProcess();
 
 public:
-    Worker(GQueue<DataIn> &in, GQueue<DataOut> &out, const char * DBName);
+    Worker(GQueue<DataIn> &in, GQueue<DataOut> &out, std::string DBName);
     ~Worker();
     void Kill();
     FRIEND_TEST(Get, Get_from_queu);

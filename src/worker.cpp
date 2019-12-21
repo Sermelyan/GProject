@@ -1,8 +1,11 @@
 #include "worker.hpp"
 #include "queue.hpp"
+#include "algorithm.hpp"
+#include <iostream>
 
 
-Worker::Worker(GQueue<DataIn> &in, GQueue<DataOut> &out, const char *DBName):In(in), Out(out), DB(DBName), Stop(false), WProces(std::bind(&Worker::WorkerProcess, this)) {
+Worker::Worker(GQueue<DataIn> &in, GQueue<DataOut> &out, std::string DBName):In(in), Out(out), DB(DBName), Stop(false),
+    WProces(std::bind(&Worker::WorkerProcess, this)) {
 }
 
 Worker::~Worker(){
@@ -20,19 +23,7 @@ void Worker::SendToQueueOut(const DataOut &value){
     Out.push(value);
 }
 void Worker::GetDotsFromDB(const DataIn &value, std::vector<Point> &points){
-    // разобрать дата ин и отправить запрос
-//    SELECT * FROM table_name
-//    WHERE column_name IN (value1, value2, ...);
-    std::string SqlRequest = "SELECT * FROM test WHERE Filters IN (";
-    for ( int i = 0; i < value.FilterList.size(); ++i ) {
-        if ( i != 0 ) {
-            SqlRequest += ", " + value.FilterList[i];
-        } else {
-            SqlRequest += value.FilterList[i];
-        }
-    }
-    SqlRequest += ");";
-    DB.Select(SqlRequest, points);
+    DB.SelectTag(value.FilterList, points);
 }
 
 void Worker::GetRibsFromAPI(const std::vector<Point> &points){
@@ -47,8 +38,14 @@ void Worker::GetRibsFromAPI(const std::vector<Point> &points){
 void Worker::GetRoute(const std::vector<std::pair<size_t,size_t>>  edge, const std::vector<size_t> weight,
                       std::pair<std::vector<int>, size_t> &res, size_t num_dots, DataIn value){
     //вызов алгоритма
-//    algorithm way(edge, weight); //  из апи 2 массива
-//    res = way.getRoute(value.StartPoint, num_dots, value.TimeLimit, value.MaxDots);
+    Algorithm way(edge, weight); //  из апи 2 массива
+    std::pair<std::vector<size_t>, size_t> R;
+    std::pair<size_t, size_t> toALg;
+    R = way.getRoute(0, num_dots, value.TimeLimit, value.MaxDots);
+    for ( auto i : R.first ) {
+        res.first.push_back(i);
+    }
+    res.second = R.second;
 }
 
 void Worker::FinalPoints(std::vector<Point> &points, const std::pair<std::vector<int>, size_t> &res){
@@ -90,50 +87,70 @@ void Worker::Kill() {
 
 //=================================================================================================================
 
-static int callback(void *data, int argc, char **argv, char **azColName){
-    int i;
-    fprintf(stderr, "%s: ", (const char*)data);
-
-    for(i = 0; i<argc; i++){
-        printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
+Table::Table(std::string filename) {
+    file.open(filename);
+    if (!file.is_open()) // если файл не открыт
+        printf("Файл не может быть открыт!\n");
+    else {
+        std::string delim("#");
+        std::string delitel(" ");
+        std::string TagsBuf;
+        Line buf;
+        std::string buffer;
+        while(getline(file,buffer)) {
+            size_t prev = 0;
+            size_t next;
+            size_t delta = delim.length();
+            size_t delta2 = delitel.length();
+            size_t prev2 = 0;
+            size_t next2 = buffer.find(delitel, prev2);
+            buf.id = atoi(buffer.substr(prev2, next2-prev2).c_str()); // atoi( str.c_str() );
+            prev2 = next2 + delta2;
+            next2 = buffer.find(delitel, prev2);
+            buf.x = atoi(buffer.substr(prev2, next2-prev2).c_str());
+            prev2 = next2 + delta2;
+            next2 = buffer.find(delitel, prev2);
+            buf.y = atoi(buffer.substr(prev2, next2-prev2).c_str());
+            prev2 = next2 + delta2;
+            next2 = buffer.find(delitel, prev2);
+            buf.Name = (buffer.substr(prev2, next2-prev2));
+            prev2 = next2 + delta2;
+            next2 = buffer.find(delitel, prev2);
+            TagsBuf = (buffer.substr(prev2, next2-prev2));
+            while( ( next = TagsBuf.find( delim, prev ) ) != std::string::npos ){
+//                printf("lag");
+                buf.Tags.push_back(TagsBuf.substr(prev, next-prev));
+                prev = next + delta;
+            }
+            buf.Tags.push_back(TagsBuf.substr(prev));
+            table.push_back(buf);
+            buf.Tags.clear();
+        }
     }
-
-    printf("\n");
-    return 0;
 }
 
-Sqlite::Sqlite(const char * filename) {
-    zErrMsg = 0;
-//    rc = sqlite3_open(filename, &DB);
-}
-
-void Sqlite::Select(std::string sql, std::vector<Point> res) {
-    std::pair<double, double> a;
-    for ( int i = 0; i < 5; ++i ) {
-        a.first = i;
-        a.second = i;
-        res.push_back(a);
+void Table::SelectTag(std::vector<std::string> values, std::vector<Point>& res) {
+    bool flag = false;
+    for ( auto lineElem : table ) {
+        for (int i = 0; i < values.size() && !flag; ++i) {
+            for (int j = 0; j < lineElem.Tags.size() && !flag; ++j) {
+                if ( values[i] == lineElem.Tags[j] ) {
+                    res.push_back(std::make_pair(lineElem.x, lineElem.y));
+                    flag = true;
+                }
+            }
+        }
+        flag = false;
     }
-
-//    const char* data = "Callback function called";
-//    if( rc ) {
-//        fprintf(stderr, "Cant open database: %s\n", sqlite3_errmsg(DB));
-////        return(0);
-//    } else {
-//        fprintf(stderr, "Opened \n");
-//    }
-//    rc = sqlite3_exec(DB, sql, callback, (void*)data, &zErrMsg);
-//
-//    if( rc != SQLITE_OK ) {
-//        fprintf(stderr, "SQL error: %s \n", zErrMsg);
-//        sqlite3_free(zErrMsg);
-//    } else {
-//        fprintf(stdout, "Successfully \n");
-//    }
+}
+void Table::SelectAll(std::vector<Point>& res){
+    for ( auto i : table) {
+        res.emplace_back(i.x, i.y);
+    }
 }
 
-Sqlite::~Sqlite() {
-//    sqlite3_close(DB);
+Table::~Table() {
+    file.close();
 }
 
 

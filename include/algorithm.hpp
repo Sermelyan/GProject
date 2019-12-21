@@ -4,6 +4,7 @@
 
 #ifndef INCLUDE_ALGORITHM_HPP_
 #define INCLUDE_ALGORITHM_HPP_
+
 #include <utility>
 #include <vector>
 #include <unordered_set>
