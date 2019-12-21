@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(GProject)
 
-find_package(Boost COMPONENTS thread)
+find_package(Boost COMPONENTS thread log http)
 IF (Boost_FOUND)
     INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
     ADD_DEFINITIONS( "-DHAS_BOOST" )
@@ -56,5 +56,5 @@ include_directories(/usr/include)
 link_directories(/usr/lib)
 target_link_libraries(worker gtest gmock sqlite3)
 
-add_executable(test test/test.cpp)
-target_link_libraries(test gtest gmock algorithm worker server proto ${PROTOBUF_LIBRARY})
+add_executable(testServer test/testServer.cpp)
+target_link_libraries(testServer gtest gmock server proto ${PROTOBUF_LIBRARY})

@@ -26,11 +26,11 @@ struct DataIn {
     DataIn() {}
     DataIn(::Filters _f, unsigned _t, unsigned _md, Point _sp, Point _ep,
            int _u)
-        : FilterList(_f),
+        : FilterList(std::move(_f)),
           TimeLimit(_t),
           MaxDots(_md),
-          StartPoint(_sp),
-          EndPoint(_ep),
+          StartPoint(std::move(_sp)),
+          EndPoint(std::move(_ep)),
           UserID(_u) {}
 };
 
@@ -39,8 +39,8 @@ struct DataOut {
     unsigned MaxTime;
     int UserID;
     DataOut() {}
-    DataOut(const Points&& _p, unsigned _t, int _u)
-        : RoutePoints(_p), MaxTime(_t), UserID(_u) {}
+    DataOut(Points _p, unsigned _t, int _u)
+        : RoutePoints(std::move(_p)), MaxTime(_t), UserID(_u) {}
 };
 
 #endif  //  INCLUDE_DATA_HPP_

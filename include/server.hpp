@@ -3,6 +3,7 @@
  */
 
 #include <memory>
+#include <set>
 #include <string>
 #include <thread>
 #include <utility>
@@ -13,66 +14,76 @@
 
 #include "data.hpp"
 #include "queue.hpp"
-#include "structures.pb.h"
 
 #ifndef INCLUDE_SERVER_HPP_
 #define INCLUDE_SERVER_HPP_
 
 class ClientAdapter;
+class Server;
 
-class Client {
-   public:
+class Client : std::enable_shared_from_this<Client> {
+  public:
     int user_id;
-
-    friend class ClientAdapter;
-    explicit Client(boost::asio::io_service &io, GQueue<DataIn> &in);
-    ~Client();
-    void Read();
-    void Write(const DataOut &out);
+    typedef std::shared_ptr<Client> ClientPtr;
 
     boost::asio::ip::tcp::socket &Sock();
-private:
-    boost::asio::ip::tcp::socket sock;
-    GQueue<DataIn> &in;
-    char buffer[1024];
+    static ClientPtr NewClient(boost::asio::io_service &io, Server &s);
 
-    void handleRead(std::string data, const boost::system::error_code &e);
-    void handleWrite(const boost::system::error_code &e);
+    void Read();
+    void Write(const std::string &msg);
 
-    static std::unique_ptr<DataIn> unmarshal(const std::string &buffer);
-    static std::string marshal(const DataOut &out);
+    static std::unique_ptr<DataIn> Unmarshal(const char *msg);
+    static std::string Marshal(const DataOut &out);
+
+  private:
+    explicit Client(boost::asio::io_service &io, Server &s);
+
+    boost::asio::ip::tcp::socket _socket;
+    Server &_server;
+    //    std::string _read_msg;
+    //    std::string _write_msg;
+
+    char _read_msg[4096];
+    std::string _write_msg;
+
+    void onRead(const boost::system::error_code &e, size_t bytes);
+    void onWrite(const boost::system::error_code &e, size_t bytes);
+    static void parseHTTP(const char *msg, const char *msg_end, std::map<std::string, std::string> &httpRequest);
 };
 
 class Server {
-   public:
+  public:
     Server(GQueue<DataIn> &in, GQueue<DataOut> &out, unsigned Port);
     ~Server();
 
     void Kill();
-    void StartServer();
+    void SendToQueue(std::unique_ptr<DataIn> data);
+    void StartAccept();
     void StartEchoServer();
+    void StartServer(unsigned serviceThr = 4, unsigned queueThr = 2);
 
-   private:
-    std::vector<std::thread> threads;
-    std::vector<std::shared_ptr<Client>> waitingClients;
+    void AddWaitingClient(const Client::ClientPtr &c);
+    void RemoveWaitingClient(const Client::ClientPtr &c);
+
+  private:
     boost::asio::io_service service;
-    boost::asio::ip::tcp::acceptor acceptor;
     GQueue<DataIn> &in;
     GQueue<DataOut> &out;
     bool alive;
     unsigned port;
 
+    boost::asio::ip::tcp::acceptor acceptor;
+    std::vector<std::thread> threads;
+    std::set<Client::ClientPtr> waitingClients;
     std::mutex liveMutex;
+    std::mutex waitingMutex;
 
-    void startAccept();
-    void onAccept(std::shared_ptr<Client> c, const boost::system::error_code &e);
-    void onSend(std::shared_ptr<Client> c, const DataOut &out,
-                const boost::system::error_code &e);
+    void onAccept(const Client::ClientPtr &c,
+                  const boost::system::error_code &e);
     bool isAlive();
+    void GetFromQueue();
 
     void sillyServer();
-
-    DataOut GetFromQueue();
 };
 
-#endif  //  INCLUDE_SERVER_HPP_
+#endif //  INCLUDE_SERVER_HPP_
