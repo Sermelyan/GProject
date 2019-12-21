@@ -5,8 +5,8 @@
 #include "algorithm.hpp"
 
 
-Algorithm::Algorithm(const std::vector<edge> &edges,
-                     const std::vector<weight> &weights) {
+Algorithm::Algorithm(const std::vector<edge> edges,
+                     const std::vector<weight> weights) {
 
     assert(edges.size() == weights.size());
 
@@ -67,12 +67,14 @@ std::vector<Algorithm::dotId> Algorithm::CalcRoute(const dotId &A,
     return answer;
 }
 
+#include <iostream>
 // new part
 // возвращает id точек пути (включая исходную) и время для обхода
 std::pair<std::vector<Algorithm::dotId>, size_t>
-Algorithm::getRoute(Algorithm::dotId from, const size_t &pointsCount,
-                    const size_t &time, const size_t &maxPlacesCount) {
+Algorithm::getRoute(Algorithm::dotId from, const size_t pointsCount,
+                    const size_t time, const size_t maxPlacesCount) {
 
+    std::cout<<"\n\n================================================TIME:"<<time<<"\n\n";
     assert(time > 0);
     assert(maxPlacesCount > 1);
 

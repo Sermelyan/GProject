@@ -38,23 +38,24 @@ TEST(Send, Send_to_queu) {
     ASSERT_EQ(res, resCheck);
 }
 
-TEST(Get_dots, Get_dots_from_DB) {
-    DataIn NotCorrect;
-    NotCorrect.UserID = -1;
-    DataOut NotCorrect2;
-    NotCorrect2.UserID = -1;
-    GQueue<DataIn> In(NotCorrect);
-    unsigned _t = 15;
-    unsigned _t2 = 200;
-    double a = 5;
-    DataIn forcheck({{"Красная_площадь"}, _t2, _t, {a,a}, {15,15}, 1});
-    GQueue<DataOut> Out(NotCorrect2);
-    std::string name = "../Attraction";
-    Worker w1(In, Out, name);
-    sleep (20);
-//    std::cout << Out.popIfNotEmpty().RoutePoints;
-    ASSERT_EQ(1,1);
-}
+//TEST(Get_dots, Get_dots_from_DB) {
+//    DataIn NotCorrect;
+//    NotCorrect.UserID = -1;
+//    DataOut NotCorrect2;
+//    NotCorrect2.UserID = -1;
+//    GQueue<DataIn> In(NotCorrect);
+//    GQueue<DataOut> Out(NotCorrect2);
+//    unsigned _t = 15;
+//    unsigned _t2 = 200;
+//    double a = 5;
+//    size_t ttt = _t2;
+//    DataIn forcheck({{"Красная_площадь"}, _t2, _t, {a,a}, {15,15}, 1});
+//    std::string name = "../Attraction";
+//    Worker w1(In, Out, name);
+//    sleep (200);
+////    std::cout << Out.popIfNotEmpty().RoutePoints;
+//    ASSERT_EQ(1,1);
+//}
 
 //TEST(Get_dots2, Get_dots_from_DB2) {
 //    MockQueue In;

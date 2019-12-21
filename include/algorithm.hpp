@@ -16,9 +16,9 @@
 class Algorithm {
 
  public:
-    typedef std::size_t dotId;
+    typedef int dotId;
     typedef std::pair<dotId, dotId> edge;
-    typedef std::size_t weight;
+    typedef int weight;
 
  private:
     typedef boost::adjacency_list <boost::listS, boost::vecS, boost::directedS,
@@ -27,7 +27,7 @@ class Algorithm {
 
  public:
     Algorithm()= delete;
-    explicit Algorithm(const std::vector<edge> &edgeArr, const std::vector<weight> &weightArr);
+    explicit Algorithm(const std::vector<edge> edgeArr, const std::vector<weight> weightArr);
     ~Algorithm();
     Algorithm(const Algorithm&) = delete;
     Algorithm(const Algorithm&&) = delete;
@@ -37,8 +37,8 @@ class Algorithm {
     std::vector<dotId> CalcRoute(const dotId &A, const dotId &B);
 
     std::pair<std::vector<Algorithm::dotId>, size_t>
-    getRoute(dotId from, const size_t &pointsCount,
-            const size_t &time, const size_t &maxPlacesCount);
+    getRoute(dotId from, const size_t pointsCount,
+            const size_t time, const size_t maxPlacesCount);
 
 
 

@@ -27,17 +27,11 @@ add_library(queue STATIC src/queue.cpp)
 
 add_library(server STATIC src/server.cpp)
 
-#find_package (SQLite3)
-#if (SQLITE3_FOUND)
-#    include_directories(${SQLITE3_INCLUDE_DIRS})
-#    target_link_libraries (new ${SQLITE3_LIBRARIES})
-#endif (SQLITE3_FOUND)
-
 add_library(worker STATIC src/worker.cpp)
 
 include_directories(/usr/include)
 link_directories(/usr/lib)
-target_link_libraries(worker gtest gmock new.cpp)
+target_link_libraries(worker gtest gmock algorithm)
 
-add_executable(test test/test.cpp src/worker.cpp)
+add_executable(test test/test.cpp src/worker.cpp src/algorithm.cpp)
 target_link_libraries(test gtest gmock)

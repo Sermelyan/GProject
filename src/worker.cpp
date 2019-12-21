@@ -35,18 +35,18 @@ void Worker::GetRibsFromAPI(const std::vector<Point> &points){
     }
 }
 
-void Worker::GetRoute(const std::vector<std::pair<size_t,size_t>>  edge, const std::vector<size_t> weight,
-                      std::pair<std::vector<int>, size_t> &res, size_t num_dots, DataIn value){
-    //вызов алгоритма
-    Algorithm way(edge, weight); //  из апи 2 массива
-    std::pair<std::vector<size_t>, size_t> R;
-    std::pair<size_t, size_t> toALg;
-    R = way.getRoute(0, num_dots, value.TimeLimit, value.MaxDots);
-    for ( auto i : R.first ) {
-        res.first.push_back(i);
-    }
-    res.second = R.second;
-}
+//void Worker::GetRoute(std::vector<Algorithm::dotId>  edges, std::vector<Algorithm::weight> weightArr,
+//                               std::pair<std::vector<int>, size_t> &res, size_t num_dots, DataIn value);{
+//    //вызов алгоритма
+//    Algorithm way(edge, weight); //  из апи 2 массива
+//    std::pair<std::vector<size_t>, size_t> R;
+//    std::pair<size_t, size_t> toALg;
+//    R = way.getRoute(0, num_dots, value.TimeLimit, value.MaxDots);
+//    for ( auto i : R.first ) {
+//        res.first.push_back(i);
+//    }
+//    res.second = R.second;
+//}
 
 void Worker::FinalPoints(std::vector<Point> &points, const std::pair<std::vector<int>, size_t> &res){
     std::vector<Point> buf;
@@ -69,9 +69,12 @@ void Worker::WorkerProcess(){
             std::vector<std::vector<double>> RibsResFromApi;
             GetRibsFromAPI(PointsResFromDB);
             std::pair<std::vector<int>, size_t> Res;
-            GetRoute(edges, weightArr, Res, PointsResFromDB.size(), value);
+//            GetRoute(edges, weightArr, Res, PointsResFromDB.size(), value);
+            Algorithm algo(edges,weightArr);
+            size_t t = value.TimeLimit;
+            Res = algo.getRoute(0, PointsResFromDB.size(),
+                    t, value.MaxDots);
             FinalPoints(PointsResFromDB, Res);
-//            DataOut OutValue(PointsResFromDB,Res.second,value.UserID);
             DataOut OutValue;
             OutValue.UserID = value.UserID;
             OutValue.MaxTime = Res.second;
