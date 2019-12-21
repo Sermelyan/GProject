@@ -4,6 +4,7 @@
 #include <iostream>
 
 
+
 Worker::Worker(GQueue<DataIn> &in, GQueue<DataOut> &out, std::string DBName):In(in), Out(out), DB(DBName), Stop(false),
     WProces(std::bind(&Worker::WorkerProcess, this)) {
 }
@@ -35,18 +36,6 @@ void Worker::GetRibsFromAPI(const std::vector<Point> &points){
     }
 }
 
-//void Worker::GetRoute(std::vector<Algorithm::dotId>  edges, std::vector<Algorithm::weight> weightArr,
-//                               std::pair<std::vector<int>, size_t> &res, size_t num_dots, DataIn value);{
-//    //вызов алгоритма
-//    Algorithm way(edge, weight); //  из апи 2 массива
-//    std::pair<std::vector<size_t>, size_t> R;
-//    std::pair<size_t, size_t> toALg;
-//    R = way.getRoute(0, num_dots, value.TimeLimit, value.MaxDots);
-//    for ( auto i : R.first ) {
-//        res.first.push_back(i);
-//    }
-//    res.second = R.second;
-//}
 
 void Worker::FinalPoints(std::vector<Point> &points, const std::pair<std::vector<int>, size_t> &res){
     std::vector<Point> buf;
@@ -55,6 +44,63 @@ void Worker::FinalPoints(std::vector<Point> &points, const std::pair<std::vector
     }
     points.clear();
     points = buf;
+
+bool Worker::getWeightFromPythonAPI(const std::string &jsonPoints, std::string &answer) {
+
+
+    boost::asio::io_context ioc;
+
+    boost::asio::ip::tcp::resolver resolver(ioc);
+
+    boost::asio::ip::tcp::socket socket(ioc);
+
+    //  установка соединения
+    try
+    {
+        boost::asio::connect(socket, resolver.resolve(host, "5000"));
+    }
+    catch (boost::system::system_error const& error)
+    {
+        std::cout << "Not connect: " << error.what() << std::endl;
+        return false;
+    }
+
+
+
+
+    //  создаем запрос
+    http::request<http::string_body> req(http::verb::post, target, 11);
+
+    //  устанавливаем поля http заголовка
+    req.set(http::field::host, host);
+    req.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
+    req.set(http::field::content_type, "application/json");
+    req.set(http::field::accept_charset, "utf-8");
+    req.content_length(jsonPoints.size());
+    req.keep_alive(req.keep_alive());
+    req.body() = jsonPoints;
+    req.prepare_payload();
+
+    //  отправляем запрос
+    http::write(socket, req);
+
+    //  читаем запрос
+    std::stringstream answerStream;
+    {
+        boost::beast::flat_buffer buffer;
+        http::response<http::dynamic_body> response;
+        http::read(socket, buffer, response);
+        answerStream << response;
+    }
+
+    //  закрываем соединение
+    socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
+
+    //  стираем заголовки из ответа
+    answer = answerStream.str();
+    size_t startJson = answer.find('{');
+    answer.erase(0, startJson);
+    return true;
 }
 
 void Worker::WorkerProcess(){
@@ -157,3 +203,10 @@ Table::~Table() {
 }
 
 
+
+}
+
+void  Worker::setHostTarget(const std::string &host, const std::string &target) {
+    this->host = host;
+    this->target = target;
+}

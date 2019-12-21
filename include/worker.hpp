@@ -1,8 +1,8 @@
+
 #include <string>
 #include <utility>
 #include <vector>
 #include <map>
-//#include "sqlite-autoconf-3300100/sqlite3.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "queue.hpp"
@@ -11,10 +11,27 @@
 #include "Data.hpp"
 #include <fstream>
 
+/*
+ * Copyright 2019 <Alex>
+ */
+
+
 #ifndef INCLUDE_WORKER_HPP_
 #define INCLUDE_WORKER_HPP_
 
-struct Limit
+// struct Limit
+#include <vector>
+#include <list>
+#include <sstream>
+#include <boost/beast.hpp>
+#include <boost/asio/connect.hpp>
+#include <boost/asio/ip/tcp.hpp>
+#include <boost/property_tree/json_parser.hpp>
+#include <boost/property_tree/ptree.hpp>
+
+#include <iostream>
+
+struct Point
 {
     double Point[4];
     int Number_of_dots;
@@ -42,6 +59,7 @@ class Table {
     virtual ~Table();
 };
 
+
 class Worker
 {
 private:
@@ -56,11 +74,17 @@ private:
     DataIn GetFromQueueIn();
     void SendToQueueOut(const DataOut &value);
     void GetDotsFromDB(const DataIn &value, std::vector<Point> &points);
-    void GetRibsFromAPI(const std::vector<Point> &points);
 //    void GetRoute(std::vector<Algorithm::dotId>  edges, std::vector<Algorithm::weight> weightArr,
 //            std::pair<std::vector<int>, size_t> &res, size_t num_dots, DataIn value);
     void FinalPoints(std::vector<Point> &points, const std::pair<std::vector<int>, size_t> &res);
     void WorkerProcess();
+    std::string host = "127.0.0.1";
+    std::string target = "/api";
+    void setHostTarget(const std::string &host, const std::string &target);
+    bool GetRibsFromAPI(const std::vector<Point> &points);
+    bool getWeightFromPythonAPI(const std::string &jsonPoints, std::string &answer);
+    std::string createJsonForSending(const std::vector<Point> &points);
+    void setJsonAnswerInClass(const std::string &answer, const size_t &pointCount);
 
 public:
     Worker(GQueue<DataIn> &in, GQueue<DataOut> &out, std::string DBName);
