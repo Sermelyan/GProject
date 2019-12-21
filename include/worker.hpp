@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 <Copyright Alex>
+ * Copyright 2019 <Alex>
  */
 
 #ifndef INCLUDE_WORKER_HPP_
