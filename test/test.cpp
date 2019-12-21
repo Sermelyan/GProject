@@ -6,6 +6,7 @@
 #include "worker.hpp"
 
 
+
 TEST(global, distance) {
 
     Worker worker;
@@ -233,6 +234,7 @@ TEST(createJsonForSend, createJsonForSend) {
     ASSERT_TRUE(result == 0);
 
 }
+
 
 
 int main(int argc, char** argv) {

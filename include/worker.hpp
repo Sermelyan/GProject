@@ -27,7 +27,7 @@ namespace http = boost::beast::http;
 
 class Worker {
 
-public:  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! PRIVATE AFTER TESTS !!!!!!!!!!!!!!!!!!!!!!
+public:
 
     // this typedef get from Algorithm before merge we don't know about Algo
     typedef std::size_t dotId;

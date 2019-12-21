@@ -23,7 +23,7 @@ include_directories(include)
 
 add_library(algorithm STATIC src/algorithm.cpp)
 
-add_library(queu STATIC src/queu.cpp)
+add_library(queu STATIC src/queue.cpp)
 
 add_library(server STATIC src/server.cpp)
 
