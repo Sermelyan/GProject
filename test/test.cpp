@@ -1,7 +1,7 @@
 /*
  * Copyright 2019 <alex>
  */
-/*
+
 #include <gtest/gtest.h>
 #include "worker.hpp"
 #include <iostream>
@@ -9,6 +9,41 @@
 #include <thread>
 #include "algorithm.hpp"
 #include <string>  // only for demonstrate display places names
+
+int allTest(){
+    return RUN_ALL_TESTS();
+}
+#define DEBUG 1
+
+
+
+int main(int argc, char** argv) {
+
+
+    std::cout<<"\n  START MAIN!  \n";
+    if (DEBUG) {
+        testing::InitGoogleTest(&argc, argv);
+        allTest();
+
+    }
+
+    // тут будет запуск всего и вся...
+
+
+
+    std::cout<<"\n  END MAIN!  \n";
+
+    return 0;
+}
+
+
+
+
+
+
+
+
+
 
 
 // QUEUE TESTS START
@@ -717,10 +752,3 @@ TEST(test6getRoute, algorithm) {
 }
 
 // ALGO TEST END
-
-
-int main(int argc, char** argv) {
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}
-*/
