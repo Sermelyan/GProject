@@ -6,16 +6,14 @@ os: linux
 compiler: gcc
 
 before_install:
-  - sudo apt-get update -q
-  - sudo apt-get install python2.7 -y
-  - sudo apt-get install valgrind -y
-  - sudo apt-get install gcov -y
   - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
   - sudo apt-get update -q
+  - sudo apt-get install cppcheck -y
+  - sudo apt-get install python3 -y
   - sudo apt-get install g++-9 -y
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 90
-  - sudo apt-get install valgrind -y
-
+  - sudo apt-get install libboost-all-dev -y
+  - sudo apt-get install protobuf-compiler libprotobuf-dev -y
   - CMAKE_VERSION=3.15.4
   - CMAKE_VERSION_DIR=v3.15
   - CMAKE_OS=Linux-x86_64
@@ -26,7 +24,6 @@ before_install:
   - mkdir -p $CMAKE_DIR
   - tar --strip-components=1 -xzf $CMAKE_TAR -C $CMAKE_DIR
   - export PATH=$CMAKE_DIR/bin:$PATH
-  - sudo apt-get install python3
   - sudo pip install flask
   - sudo python ./serverAPI.py &
 
