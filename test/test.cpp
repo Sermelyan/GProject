@@ -44,85 +44,88 @@ TEST(Get_dots, Get_dots_from_DB) {
     DataOut NotCorrect2;
     NotCorrect2.UserID = -1;
     GQueue<DataIn> In(NotCorrect);
-    unsigned _t = 15;
-    unsigned _t2 = 200;
-    double a = 5;
-    DataIn forcheck({{"Красная_площадь"}, _t2, _t, {a,a}, {15,15}, 1});
     GQueue<DataOut> Out(NotCorrect2);
-    std::string name = "../Attraction";
-    Worker w1(In, Out, name);
-    sleep (20);
-//    std::cout << Out.popIfNotEmpty().RoutePoints;
-    ASSERT_EQ(1,1);
+    DataIn forcheck;
+    forcheck.FilterList = {{"dfgvd"}};
+    Worker w1(In, Out, "../Attraction");
+    w1.Kill();
+    std::vector<Point> a;
+    std::vector<Point> check = {};
+    w1.GetDotsFromDB(forcheck,a);
+    ASSERT_EQ(a, check);
 }
 
-//TEST(Get_dots2, Get_dots_from_DB2) {
-//    MockQueue In;
-//    MockQueue Out;
-//    MockDatabase DB;
-//    std::vector<Point> points;
-//    Worker w1(In, Out, DB);
-//    std::vector<std::string> filters {"1917"};
-//    Limit lim;
-//    for( int i = 0; i < 4; ++i ) {
-//        lim.Point[i] = i * 100;
-//    }
-//    lim.Time = 256;
-//    Data_in value(filters,1, lim);
-//    w1.GetDotsFromDB(value, points);
-//    std::vector<Point> check = {{46,34},{44,34}};
-//    ASSERT_EQ(points,check);
-//}
+TEST(Get_dots2, Get_dots_from_DB2) {
+    DataIn NotCorrect;
+    NotCorrect.UserID = -1;
+    DataOut NotCorrect2;
+    NotCorrect2.UserID = -1;
+    GQueue<DataIn> In(NotCorrect);
+    GQueue<DataOut> Out(NotCorrect2);
+    DataIn forcheck;
+    forcheck.FilterList = {{"Красная_площадь"}};
+    Worker w1(In, Out, "../Attraction");
+    w1.Kill();
+    std::vector<Point> a;
+    std::vector<Point> check = {{5,13},{5,10},{4,8},{5, 11}};
+    w1.GetDotsFromDB(forcheck,a);
+    ASSERT_EQ(a, check);
+}
 ////
-//TEST(Get_dots3, Get_dots_from_DB3) {
-//    MockQueue In;
-//    MockQueue Out;
-//    MockDatabase DB;
-//    std::vector<Point> points;
-//    Worker w1(In, Out, DB);
-//    std::vector<std::string> filters {"Достоевский"};
-//    Limit lim;
-//    for( int i = 0; i < 4; ++i ) {
-//        lim.Point[i] = i * 100;
+TEST(Get_dots3, Get_dots_from_DB3) {
+    DataIn NotCorrect;
+    NotCorrect.UserID = -1;
+    DataOut NotCorrect2;
+    NotCorrect2.UserID = -1;
+    GQueue<DataIn> In(NotCorrect);
+    GQueue<DataOut> Out(NotCorrect2);
+    DataIn forcheck;
+    forcheck.FilterList = {{"Красная_площадь"},{"История"}};
+    Worker w1(In, Out, "../Attraction");
+    w1.Kill();
+    std::vector<Point> a;
+//    for ( auto i : a ) {
+//        std::cout<<i.first << i.second << std::endl;
 //    }
-//    lim.Time = 256;
-//    Data_in value(filters,1, lim);
-//    w1.GetDotsFromDB(value, points);
-//    std::vector<Point> check = {{46,34}};
-//    ASSERT_EQ(points,check);
-//}
+    std::vector<Point> check = { {5, 13}, {5, 10}, {4, 8}, {5, 11}, {58, 65},
+                                 {54, 63}, {60, 65} };
+    w1.GetDotsFromDB(forcheck,a);
+    ASSERT_EQ(a, check);
+}
 //
-//TEST(Get_dots4, NumberOfDots) {
-//    MockQueue In;
-//    MockQueue Out;
-//    MockDatabase DB;
-//    std::vector<Point> points;
-//    Worker w1(In, Out, DB);
-//    std::vector<std::string> filters {"Достоевский"};
-//    Limit lim;
-//    for( int i = 0; i < 4; ++i ) {
-//        lim.Point[i] = i * 100;
-//    }
-//    lim.Time = 256;
-//    lim.Number_of_dots = 0;
-//    Data_in value(filters,1, lim);
-//    w1.GetDotsFromDB(value, points);
-//    std::vector<Point> check = {};
-//    ASSERT_EQ(points,check);
-//}
-////
-//TEST(Get_route, Get_route) {
-//    MockQueue In;
-//    MockQueue Out;
-//    MockDatabase DB;
-//    std::vector<Point> points {{1, 2},{1, 2},{1, 2}};
-//    std::vector<std::vector<int>> ribs {{1, 2, 4},{1, 2}};
-//    Worker w1(In, Out, DB);
-//    std::list<Point> check;
-//    std::list<Point> res;
-//    w1.GetRoute(points, ribs, res);
-//    ASSERT_EQ(check, res);
-//}
+TEST(Get_dots4, NumberOfDots) {
+    DataIn NotCorrect;
+    NotCorrect.UserID = -1;
+    DataOut NotCorrect2;
+    NotCorrect2.UserID = -1;
+    GQueue<DataIn> In(NotCorrect);
+    GQueue<DataOut> Out(NotCorrect2);
+    DataIn forcheck;
+    forcheck.FilterList = {{"История"}};
+    Worker w1(In, Out, "../Attraction");
+    w1.Kill();
+    In.push(forcheck);
+    DataIn a;
+    a.FilterList = w1.GetFromQueueIn().FilterList;
+    ASSERT_EQ(a.FilterList, forcheck.FilterList);
+}
+
+TEST(Get_dots5, NumberOfDots) {
+    DataIn NotCorrect;
+    NotCorrect.UserID = -1;
+    DataOut NotCorrect2;
+    NotCorrect2.UserID = -1;
+    GQueue<DataIn> In(NotCorrect);
+    GQueue<DataOut> Out(NotCorrect2);
+    Worker w1(In, Out, "../Attraction");
+    w1.Kill();
+    std::vector<Point> points = {{1,2},{3,4},{5,6},{7,8},{9,10},{11,11}};
+    std::pair<std::vector<Algorithm::dotId >, size_t> res = {{1,3,5},5};
+    std::vector<Point> Result = {{3, 4}, {7, 8}, {11, 11}};
+    w1.FinalPoints(points,res);
+    ASSERT_EQ(points, Result);
+}
+
 
 int main(int argc, char** argv) {
     testing::InitGoogleTest(&argc, argv);

@@ -15,7 +15,7 @@ Worker::~Worker(){
 }
 
 DataIn Worker::GetFromQueueIn(){
-    DataIn a;
+    DataIn a = In.popIfNotEmpty();
     return a;
 }
 
@@ -35,20 +35,13 @@ void Worker::GetRibsFromAPI(const std::vector<Point> &points){
     }
 }
 
-void Worker::GetRoute(const std::vector<std::pair<size_t,size_t>>  edge, const std::vector<size_t> weight,
-                      std::pair<std::vector<int>, size_t> &res, size_t num_dots, DataIn value){
-    //вызов алгоритма
+void Worker::GetRoutefromAlgorithm(const std::vector<Algorithm::edge>  edge, const std::vector<size_t> weight,
+                      std::pair<std::vector<Algorithm::dotId >, size_t> &res, size_t num_dots, DataIn value){
     Algorithm way(edge, weight); //  из апи 2 массива
-    std::pair<std::vector<size_t>, size_t> R;
-    std::pair<size_t, size_t> toALg;
-    R = way.getRoute(0, num_dots, value.TimeLimit, value.MaxDots);
-    for ( auto i : R.first ) {
-        res.first.push_back(i);
-    }
-    res.second = R.second;
+    res = way.getRoute(0, num_dots, value.TimeLimit, value.MaxDots);
 }
 
-void Worker::FinalPoints(std::vector<Point> &points, const std::pair<std::vector<int>, size_t> &res){
+void Worker::FinalPoints(std::vector<Point> &points, const std::pair<std::vector<Algorithm::dotId >, size_t> &res){
     std::vector<Point> buf;
     for( int i = 0;  i < res.first.size(); ++i ) {
         buf.push_back(points[res.first[i]]);
@@ -68,10 +61,9 @@ void Worker::WorkerProcess(){
             GetDotsFromDB(value, PointsResFromDB);
             std::vector<std::vector<double>> RibsResFromApi;
             GetRibsFromAPI(PointsResFromDB);
-            std::pair<std::vector<int>, size_t> Res;
-            GetRoute(edges, weightArr, Res, PointsResFromDB.size(), value);
+            std::pair<std::vector<Algorithm::dotId >, size_t> Res;
+            GetRoutefromAlgorithm(edges, weightArr, Res, PointsResFromDB.size(), value); // !!!!!!!!!!!
             FinalPoints(PointsResFromDB, Res);
-//            DataOut OutValue(PointsResFromDB,Res.second,value.UserID);
             DataOut OutValue;
             OutValue.UserID = value.UserID;
             OutValue.MaxTime = Res.second;
@@ -79,6 +71,10 @@ void Worker::WorkerProcess(){
             SendToQueueOut(OutValue);
         }
     }
+}
+
+void Worker::GetRest(int timeToSleep) {
+
 }
 
 void Worker::Kill() {
@@ -118,7 +114,6 @@ Table::Table(std::string filename) {
             next2 = buffer.find(delitel, prev2);
             TagsBuf = (buffer.substr(prev2, next2-prev2));
             while( ( next = TagsBuf.find( delim, prev ) ) != std::string::npos ){
-//                printf("lag");
                 buf.Tags.push_back(TagsBuf.substr(prev, next-prev));
                 prev = next + delta;
             }

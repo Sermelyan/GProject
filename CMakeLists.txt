@@ -39,5 +39,5 @@ include_directories(/usr/include)
 link_directories(/usr/lib)
 target_link_libraries(worker gtest gmock new.cpp)
 
-add_executable(test test/test.cpp src/worker.cpp)
+add_executable(test test/test.cpp src/worker.cpp src/algorithm.cpp)
 target_link_libraries(test gtest gmock)

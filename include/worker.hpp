@@ -57,14 +57,14 @@ private:
     void SendToQueueOut(const DataOut &value);
     void GetDotsFromDB(const DataIn &value, std::vector<Point> &points);
     void GetRibsFromAPI(const std::vector<Point> &points);
-    void GetRoute(std::vector<std::pair<size_t,size_t>>  edges, std::vector<size_t> weightArr,
-            std::pair<std::vector<int>, size_t> &res, size_t num_dots, DataIn value);
-    void FinalPoints(std::vector<Point> &points, const std::pair<std::vector<int>, size_t> &res);
+    void GetRoutefromAlgorithm(const std::vector<Algorithm::edge>  edge, const std::vector<size_t> weight,
+                               std::pair<std::vector<Algorithm::dotId >, size_t> &res, size_t num_dots, DataIn value);
+    void FinalPoints(std::vector<Point> &points, const std::pair<std::vector<Algorithm::dotId >, size_t> &res);
     void WorkerProcess();
-
 public:
     Worker(GQueue<DataIn> &in, GQueue<DataOut> &out, std::string DBName);
     ~Worker();
+    void GetRest(int timeToSleep);
     void Kill();
     FRIEND_TEST(Get, Get_from_queu);
     FRIEND_TEST(Send, Send_to_queu);
@@ -72,6 +72,6 @@ public:
     FRIEND_TEST(Get_dots2, Get_dots_from_DB2);
     FRIEND_TEST(Get_dots3, Get_dots_from_DB3);
     FRIEND_TEST(Get_dots4, NumberOfDots);
-    FRIEND_TEST(Get_route, Get_route);
+    FRIEND_TEST(Get_dots5, NumberOfDots);
 };
 #endif  //  INCLUDE_WORKER_HPP_

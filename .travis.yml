@@ -29,7 +29,6 @@ before_install:
   - sudo python ./serverAPI.py &
 
 script:
-  - ./linters/run.sh --local
   - mkdir build
   - cd build
   - cmake ../
