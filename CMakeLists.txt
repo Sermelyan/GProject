@@ -29,8 +29,10 @@ add_library(server STATIC src/server.cpp)
 
 add_library(worker STATIC src/worker.cpp)
 
-add_library(mytest STATIC src/test.cpp)
+
 
 add_executable(test src/main.cpp src/worker.cpp  src/algorithm.cpp src/server.cpp src/test.cpp)
 
 target_link_libraries(test gtest)
+
+add_library(mytest STATIC src/test.cpp)

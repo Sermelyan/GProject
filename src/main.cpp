@@ -2,8 +2,10 @@
 // Created by alex on 21/12/2019.
 //
 
+#include <gtest/gtest.h>
 #include <iostream>
 #include "Test.hpp"
+
 
 #define DEBUG 1
 

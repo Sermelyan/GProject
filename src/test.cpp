@@ -1,7 +1,7 @@
 //
 // Created by alex on 21/12/2019.
 //
-#include <gtest/gtest.h>
+#include "Test.hpp"
 #include "worker.hpp"
 #include <iostream>
 #include "queue.hpp"
