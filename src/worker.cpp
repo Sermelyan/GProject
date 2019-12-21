@@ -1,49 +1,49 @@
-/*
- * Copyright 2019 <Copyright Alex>
- */
-
 #include "worker.hpp"
+#include "queue.hpp"
+#include "algorithm.hpp"
+#include <iostream>
 
 
-bool Worker::GetRibsFromAPI(const std::vector<Point> &points ) {
 
-    const size_t pointCount = points.size();
-    if (pointCount < MIN_POINT_COUNT || pointCount > MAX_POINT_COUNT)
-        return false;
-
-    const std::string jsonForSending = createJsonForSending(points);
-
-    std::string answer;
-
-    if ( !getWeightFromPythonAPI(jsonForSending, answer) )
-        return false;
-
-    setJsonAnswerInClass(answer, pointCount);
-    return true;
+Worker::Worker(GQueue<DataIn> &in, GQueue<DataOut> &out, std::string DBName):In(in), Out(out), DB(DBName), Stop(false),
+    WProces(std::bind(&Worker::WorkerProcess, this)) {
 }
 
+Worker::~Worker(){
+    Stop = true;
+    printf("End WorkerProc \n");
+    WProces.join();
+}
 
-std::string Worker::createJsonForSending(const std::vector<Point> &points) {
+DataIn Worker::GetFromQueueIn(){
+    DataIn a;
+    return a;
+}
 
-    boost::property_tree::ptree rootJsonTree;
-    boost::property_tree::ptree coordinates;
-    boost::property_tree::ptree coordinate;
+void Worker::SendToQueueOut(const DataOut &value){
+    Out.push(value);
+}
+void Worker::GetDotsFromDB(const DataIn &value, std::vector<Point> &points){
+    DB.SelectTag(value.FilterList, points);
+}
 
-    for (size_t i = 0 ; i < points.size() ; i++) {
-        coordinate.put("X", points.at(i).X);
-        coordinate.put("Y", points.at(i).Y);
-        // id координаты = её место в принимающем векторе
-        std::string id = std::to_string(i);
-        coordinates.add_child( id, coordinate);
+void Worker::GetRibsFromAPI(const std::vector<Point> &points){
+    for ( int i = 0; i < points.size(); ++i ) {
+        for(int j = 0; j < points.size() - 1; ++j ) {
+            weightArr.push_back(2);
+            edges.push_back(std::make_pair(i, j));
+        }
     }
-
-    rootJsonTree.add_child("coordinates", coordinates);
-    std::stringstream jsonStream;
-    boost::property_tree::write_json(jsonStream, rootJsonTree);
-
-    return jsonStream.str();
 }
 
+
+void Worker::FinalPoints(std::vector<Point> &points, const std::pair<std::vector<int>, size_t> &res){
+    std::vector<Point> buf;
+    for( int i = 0;  i < res.first.size(); ++i ) {
+        buf.push_back(points[res.first[i]]);
+    }
+    points.clear();
+    points = buf;
 
 bool Worker::getWeightFromPythonAPI(const std::string &jsonPoints, std::string &answer) {
 
@@ -103,39 +103,106 @@ bool Worker::getWeightFromPythonAPI(const std::string &jsonPoints, std::string &
     return true;
 }
 
-void Worker::setJsonAnswerInClass(const std::string &json, const size_t &pointCount){
-
-    boost::property_tree::ptree answerTree;
-    std::istringstream is(json);
-    boost::property_tree::json_parser::read_json(is, answerTree);
-
-    answerTree = answerTree.get_child("weights");
-
-    std::string key;
-    for (size_t i = 0 ; i < pointCount ; i++)
-        for (size_t j = 0 ; j < pointCount ; j++) {
-            if (i == j)
-                continue;
-            key = std::to_string(i) + "->" + std::to_string(j);
-            size_t distance = answerTree.get_child(key).get_value<size_t>() ;
-            edges.push_back(std::make_pair(i, j));
-            weightArr.push_back(distance);
+void Worker::WorkerProcess(){
+    int counter = 1;
+    while ( !Stop ) {
+        DataIn value = GetFromQueueIn();
+        if ( value.UserID == -1) {
+            sleep(200);
+        } else {
+            std::vector<Point> PointsResFromDB;
+            GetDotsFromDB(value, PointsResFromDB);
+            std::vector<std::vector<double>> RibsResFromApi;
+            GetRibsFromAPI(PointsResFromDB);
+            std::pair<std::vector<int>, size_t> Res;
+//            GetRoute(edges, weightArr, Res, PointsResFromDB.size(), value);
+            Algorithm algo(edges,weightArr);
+            size_t t = value.TimeLimit;
+            Res = algo.getRoute(0, PointsResFromDB.size(),
+                    t, value.MaxDots);
+            FinalPoints(PointsResFromDB, Res);
+            DataOut OutValue;
+            OutValue.UserID = value.UserID;
+            OutValue.MaxTime = Res.second;
+            OutValue.RoutePoints = PointsResFromDB;
+            SendToQueueOut(OutValue);
         }
+    }
 }
 
-long int Worker::getWeightIndex(const size_t &pointsCount, const size_t &from, const size_t &to){
+void Worker::Kill() {
+    Stop = true;
+}
 
-    if (from > pointsCount - 1 || to > pointsCount - 1 ||
-        from == to)
-        return -1; // return error
+//=================================================================================================================
 
-    if (from == 0)
-        return to - 1;
+Table::Table(std::string filename) {
+    file.open(filename);
+    if (!file.is_open()) // если файл не открыт
+        printf("Файл не может быть открыт!\n");
+    else {
+        std::string delim("#");
+        std::string delitel(" ");
+        std::string TagsBuf;
+        Line buf;
+        std::string buffer;
+        while(getline(file,buffer)) {
+            size_t prev = 0;
+            size_t next;
+            size_t delta = delim.length();
+            size_t delta2 = delitel.length();
+            size_t prev2 = 0;
+            size_t next2 = buffer.find(delitel, prev2);
+            buf.id = atoi(buffer.substr(prev2, next2-prev2).c_str()); // atoi( str.c_str() );
+            prev2 = next2 + delta2;
+            next2 = buffer.find(delitel, prev2);
+            buf.x = atoi(buffer.substr(prev2, next2-prev2).c_str());
+            prev2 = next2 + delta2;
+            next2 = buffer.find(delitel, prev2);
+            buf.y = atoi(buffer.substr(prev2, next2-prev2).c_str());
+            prev2 = next2 + delta2;
+            next2 = buffer.find(delitel, prev2);
+            buf.Name = (buffer.substr(prev2, next2-prev2));
+            prev2 = next2 + delta2;
+            next2 = buffer.find(delitel, prev2);
+            TagsBuf = (buffer.substr(prev2, next2-prev2));
+            while( ( next = TagsBuf.find( delim, prev ) ) != std::string::npos ){
+//                printf("lag");
+                buf.Tags.push_back(TagsBuf.substr(prev, next-prev));
+                prev = next + delta;
+            }
+            buf.Tags.push_back(TagsBuf.substr(prev));
+            table.push_back(buf);
+            buf.Tags.clear();
+        }
+    }
+}
 
-    if (from < to)
-       return ( (pointsCount -1) * from + to) - 1;
+void Table::SelectTag(std::vector<std::string> values, std::vector<Point>& res) {
+    bool flag = false;
+    for ( auto lineElem : table ) {
+        for (int i = 0; i < values.size() && !flag; ++i) {
+            for (int j = 0; j < lineElem.Tags.size() && !flag; ++j) {
+                if ( values[i] == lineElem.Tags[j] ) {
+                    res.push_back(std::make_pair(lineElem.x, lineElem.y));
+                    flag = true;
+                }
+            }
+        }
+        flag = false;
+    }
+}
+void Table::SelectAll(std::vector<Point>& res){
+    for ( auto i : table) {
+        res.emplace_back(i.x, i.y);
+    }
+}
 
-    return ( (pointsCount -1) * from + to);
+Table::~Table() {
+    file.close();
+}
+
+
 
 }
 

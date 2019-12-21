@@ -23,11 +23,15 @@ include_directories(include)
 
 add_library(algorithm STATIC src/algorithm.cpp)
 
-add_library(queu STATIC src/queu.cpp)
+add_library(queue STATIC src/queue.cpp)
 
 add_library(server STATIC src/server.cpp)
 
 add_library(worker STATIC src/worker.cpp)
 
-add_executable(test test/test.cpp src/worker.cpp)
-target_link_libraries(test gtest)
+include_directories(/usr/include)
+link_directories(/usr/lib)
+target_link_libraries(worker gtest gmock algorithm)
+
+add_executable(test test/test.cpp src/worker.cpp src/algorithm.cpp)
+target_link_libraries(test gtest gmock)
