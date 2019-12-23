@@ -32,23 +32,25 @@ class Client : std::enable_shared_from_this<Client> {
     void Read();
     void Write(const std::string &msg);
 
-    static std::unique_ptr<DataIn> Unmarshal(const char *msg);
+    static std::unique_ptr<DataIn> Unmarshal(const std::string &buffer);
     static std::string Marshal(const DataOut &out);
+    static bool checkRequest(std::map<std::string, std::string> &httpRequest);
 
-  private:
+    //    std::string _read_msg;
+    static void parseHTTP(const char *msg, const char *msg_end, std::map<std::string, std::string> &httpRequest);
+private:
+
     explicit Client(boost::asio::io_service &io, Server &s);
-
     boost::asio::ip::tcp::socket _socket;
     Server &_server;
-    //    std::string _read_msg;
+
     //    std::string _write_msg;
-
     char _read_msg[4096];
-    std::string _write_msg;
 
+    std::string _write_msg;
     void onRead(const boost::system::error_code &e, size_t bytes);
     void onWrite(const boost::system::error_code &e, size_t bytes);
-    static void parseHTTP(const char *msg, const char *msg_end, std::map<std::string, std::string> &httpRequest);
+    void onError(const boost::system::error_code &e);
 };
 
 class Server {
@@ -62,7 +64,7 @@ class Server {
     void StartEchoServer();
     void StartServer(unsigned serviceThr = 4, unsigned queueThr = 2);
 
-    void AddWaitingClient(const Client::ClientPtr &c);
+    void AddWaitingClient(const Client::ClientPtr c);
     void RemoveWaitingClient(const Client::ClientPtr &c);
 
   private:

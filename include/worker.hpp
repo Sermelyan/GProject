@@ -4,7 +4,6 @@
 #include <string>
 #include <vector>
 #include <map>
-#include "sqlite-autoconf-3300100/sqlite3.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "queue.hpp"

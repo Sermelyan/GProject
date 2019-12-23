@@ -7,9 +7,6 @@ IF (Boost_FOUND)
     ADD_DEFINITIONS( "-DHAS_BOOST" )
 ENDIF()
 
-find_package(Protobuf)
-include_directories(${PROTOBUF_INCLUDE_DIR})
-
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 
@@ -33,15 +30,11 @@ set(CMAKE_CXX_STANDARD 17)
 
 include_directories(include)
 
-protobuf_generate_cpp(PROTO_SRC PROTO_HEADER protobuf/structures.proto)
-add_library(proto ${PROTO_HEADER} ${PROTO_SRC})
-
 add_library(algorithm STATIC src/algorithm.cpp)
-
-add_library(queue STATIC src/queue.cpp)
+target_link_libraries(algorithm ${Boost_LIBRARIES})
 
 add_library(server STATIC src/server.cpp)
-target_link_libraries(server proto ${Boost_LIBRARIES})
+target_link_libraries(server ${Boost_LIBRARIES})
 
 #find_package (sqlite3.h)
 
@@ -57,4 +50,7 @@ link_directories(/usr/lib)
 target_link_libraries(worker gtest gmock sqlite3)
 
 add_executable(testServer test/testServer.cpp)
-target_link_libraries(testServer gtest gmock server proto ${PROTOBUF_LIBRARY})
+target_link_libraries(testServer gtest gmock server)
+
+add_executable(main test/main.cpp)
+target_link_libraries(main server #[[worker ]] algorithm)

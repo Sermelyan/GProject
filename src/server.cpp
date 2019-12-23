@@ -3,7 +3,6 @@
  */
 
 #include <algorithm>
-#include <boost/beast/http/parser.hpp>
 #include <boost/beast/http/string_body.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -15,7 +14,10 @@
 #include "server.hpp"
 
 Server::Server(GQueue<DataIn> &_in, GQueue<DataOut> &_out, unsigned Port)
-    : in(_in), out(_out), alive(true), port(Port),
+    : in(_in),
+      out(_out),
+      alive(true),
+      port(Port),
       acceptor(service, boost::asio::ip::tcp::endpoint(
                             boost::asio::ip::tcp::v4(), Port)) {}
 
@@ -45,8 +47,7 @@ void Server::StartServer(unsigned serviceThr, unsigned queueThr) {
 }
 
 void Server::StartAccept() {
-    if (!isAlive())
-        return;
+    if (!isAlive()) return;
     Client::ClientPtr c = Client::NewClient(service, *this);
     acceptor.async_accept(c->Sock(),
                           boost::bind(&Server::onAccept, this, c,
@@ -61,7 +62,9 @@ void Server::onAccept(const Client::ClientPtr &c,
     }
     BOOST_LOG_TRIVIAL(debug)
         << "Server(onAccept): new client at port: " << port;
-    c->Read();
+    boost::asio::ip::tcp::socket::keep_alive ka(true);
+    c->Sock().set_option(ka);
+    c->Sock().async_wait(boost::asio::ip::tcp::socket::wait_read, boost::bind(&Client::Read, c));
     StartAccept();
 }
 
@@ -94,7 +97,7 @@ void Server::GetFromQueue() {
 
 void Server::SendToQueue(std::unique_ptr<DataIn> data) { in.push(*data); }
 
-void Server::AddWaitingClient(const Client::ClientPtr &c) {
+void Server::AddWaitingClient(const Client::ClientPtr c) {
     const std::lock_guard<std::mutex> lock(waitingMutex);
     BOOST_LOG_TRIVIAL(trace)
         << "Server(AddWaitingClient): added client: " << c->user_id
@@ -123,12 +126,43 @@ void Server::sillyServer() {
     while (isAlive()) {
         boost::asio::ip::tcp::socket sock(service);
         acceptor.accept(sock);
-        std::cout << "Server: Aviable bytes: " << sock.available() << std::endl;
-        char buff[1024];
+        BOOST_LOG_TRIVIAL(debug)
+            << "Server(onAccept): new client at port: " << port;
+        char buff[4096];
         auto bytes = sock.receive(boost::asio::buffer(buff));
-        std::cout << "Server: Received bytes: " << bytes << std::endl;
-        sock.write_some(boost::asio::buffer(buff, bytes));
+//        std::map<std::string, std::string> httpRequest;
+//        Client::parseHTTP(buff, buff + bytes, httpRequest);
+//        if (!Client::checkRequest(httpRequest)) {
+//            sock.close();
+//            continue;
+//        }
+        auto in = Client::Unmarshal(buff);
+        if (!in) {
+            BOOST_LOG_TRIVIAL(error)
+                << "Client(onRead): client didn't send any valid data.";
+            sock.close();
+            continue;
+        }
+        SendToQueue(std::move(in));
+        std::string outStr;
+        while (true) {
+            auto data = out.popIfNotEmpty();
+            auto id = data.UserID;
+            if (id > -1) {
+                BOOST_LOG_TRIVIAL(trace)
+                    << "Server(GetFromQueue): poped data for user with id: " << id;
+                outStr = Client::Marshal(data);
+                break;
+            }
+            boost::this_thread::sleep(boost::posix_time::millisec(10));
+        }
+        std::string resp = "POST / HTTP/1.1\r\n"
+                           "Content-Type: application/json\r\n\r\n";
+        resp += outStr + "\r\n";
+        sock.send(boost::asio::buffer(resp));
         sock.close();
+        BOOST_LOG_TRIVIAL(trace)
+            << "Server(GetFromQueue): send data to user";
         boost::this_thread::sleep(boost::posix_time::millisec(1));
     }
 }
@@ -145,12 +179,16 @@ Client::ClientPtr Client::NewClient(boost::asio::io_service &io, Server &s) {
     return Client::ClientPtr(new Client(io, s));
 }
 
+void Client::onError(const boost::system::error_code &e) {
+    BOOST_LOG_TRIVIAL(error) << "Client(onError): error: " << e;
+}
+
 void Client::Read() {
     BOOST_LOG_TRIVIAL(trace)
         << "Client(Read): started read. aviaelable:" << _socket.available();
-    _socket.async_receive(
+    _socket.async_read_some(
         boost::asio::buffer(_read_msg, _socket.available()),
-        boost::bind(&Client::onRead, this, boost::asio::placeholders::error,
+        boost::bind(&Client::onRead, ClientPtr (this), boost::asio::placeholders::error,
                     boost::asio::placeholders::bytes_transferred));
     BOOST_LOG_TRIVIAL(trace) << "Client(Read): finished read.";
 }
@@ -161,18 +199,26 @@ void Client::onRead(const boost::system::error_code &e, size_t bytes) {
         return;
     }
     BOOST_LOG_TRIVIAL(trace) << "Client(onRead): recived: " << _read_msg;
-    BOOST_LOG_TRIVIAL(trace) << "Client(onRead): red bytes: " << bytes;
-    auto in = Unmarshal(_read_msg);
-    if (in) {
-        user_id = in->UserID;
-        BOOST_LOG_TRIVIAL(debug)
-            << "Client(onRead): got data from client with id: " << user_id;
-        _server.SendToQueue(std::move(in));
-        _server.AddWaitingClient(shared_from_this());
-    } else {
+
+    std::map<std::string, std::string> httpRequest;
+    parseHTTP(_read_msg, _read_msg + bytes, httpRequest);
+    if (!checkRequest(httpRequest)) {
+        _server.StartAccept();
+        return;
+    }
+    auto in = Unmarshal(httpRequest["Data"]);
+    if (!in) {
         BOOST_LOG_TRIVIAL(error)
             << "Client(onRead): client didn't send any valid data.";
+        _server.StartAccept();
+        return;
     }
+    user_id = in->UserID;
+    BOOST_LOG_TRIVIAL(debug)
+        << "Client(onRead): got data from client with id: " << user_id;
+    _server.SendToQueue(std::move(in));
+//    _socket.async_wait(boost::asio::ip::tcp::socket::wait_error, boost::bind(&Client::onError, this, boost::asio::placeholders::error));
+    _server.AddWaitingClient(ClientPtr (this));
     _server.StartAccept();
 }
 
@@ -196,71 +242,61 @@ void Client::onWrite(const boost::system::error_code &e, size_t bytes) {
     _server.StartAccept();
 }
 
-void Client::parseHTTP(const char *msg, const char *msg_end, std::map<std::string, std::string> &httpRequest) {
+bool Client::checkRequest(
+    std::map<std::string, std::string> &httpRequest) {
+    if (httpRequest["Type"] == "POST" && httpRequest["Version"] == "HTTP/1.1" &&
+        httpRequest["Content-Type"] == "application/json")
+        return true;
+    //TODO add error answer to client
+    return false;
+}
+
+void Client::parseHTTP(const char *msg, const char *msg_end,
+                       std::map<std::string, std::string> &httpRequest) {
     const char *head = msg;
     const char *tail = msg;
 
-    // Find request type
     while (tail != msg_end && *tail != ' ') ++tail;
     httpRequest["Type"] = std::string(head, tail);
 
-    // Find path
     while (tail != msg_end && *tail == ' ') ++tail;
     head = tail;
     while (tail != msg_end && *tail != ' ') ++tail;
     httpRequest["Path"] = std::string(head, tail);
 
-    // Find HTTP version
     while (tail != msg_end && *tail == ' ') ++tail;
     head = tail;
     while (tail != msg_end && *tail != '\n') ++tail;
-    httpRequest["Version"] = std::string(head, tail);
+    httpRequest["Version"] = std::string(head, tail - 1);
     if (tail != msg_end) ++tail;
+
     head = tail;
     while (head != msg_end && *head != '\n') {
         while (tail != msg_end && *tail != '\n') ++tail;
-        const char *colon = static_cast<const char *>(memchr(head, ':', tail - head));
-        if (colon == NULL) {
-            // TODO: malformed headers, what should happen?
+        const char *colon =
+            static_cast<const char *>(memchr(head, ':', tail - head));
+        if (colon == nullptr) {
+            const char *lastBrace = msg_end;
+            while (tail != msg_end) {
+                if (*tail == '}') lastBrace = tail;
+                ++tail;
+            };
+            while (head != msg_end && *head != '{') ++head;
+            httpRequest["Data"] = std::string(head, lastBrace + 1);
             break;
         }
-        const char *value = colon+1;
+        const char *value = colon + 1;
         while (value != tail && *value == ' ') ++value;
-        httpRequest[ std::string(head, colon) ] = std::string(value, tail);
-        head = tail+1;
-        tail++;
+        httpRequest[std::string(head, colon)] = std::string(value, tail - 1);
+        head = ++tail;
     }
 }
 
-// std::unique_ptr<DataIn> Client::Unmarshal(const std::string &buffer) {
-//    auto parsePoint = [](const Data::Point &p) -> Point {
-//        return std::make_pair(p.x(), p.y());
-//    };
-//
-//    Data::In data;
-//    if (!data.ParseFromString(buffer))
-//        return nullptr;
-//    Filters f;
-//    for (size_t i = 0; i < data.filters_size(); i++)
-//        f.push_back(data.filters(i));
-//    std::unique_ptr<DataIn> parsed(
-//        new DataIn(std::move(f), data.timelimit(), data.maxdots(),
-//                   std::move(parsePoint(data.startpoint())),
-//                   parsePoint(data.endpoint()), data.userid()));
-//    return parsed;
-//}
-
-std::unique_ptr<DataIn> Client::Unmarshal(const char *msg) {
-    std::string buffer(msg);
+std::unique_ptr<DataIn> Client::Unmarshal(const std::string &buffer) {
     if (buffer.empty()) {
         BOOST_LOG_TRIVIAL(error)
             << "Client(unmarshal): invalid string (zero size).";
         return nullptr;
-    }
-    std::map<std::string, std::string> httpReq;
-    parseHTTP(msg, msg + buffer.size(), httpReq);
-    for (const auto &item : httpReq) {
-        std::cout << item.first << " " << item.second << std::endl;
     }
     BOOST_LOG_TRIVIAL(trace)
         << "Client(unmarshal): startet unmarshal string: " << buffer;
@@ -291,19 +327,6 @@ std::unique_ptr<DataIn> Client::Unmarshal(const char *msg) {
     }
     return nullptr;
 }
-
-// std::string Client::Marshal(const DataOut &out) {
-//    Data::Out decoded;
-//    for (auto &&i : out.RoutePoints) {
-//        auto t = new Data::Point;
-//        t->set_x(i.first);
-//        t->set_y(i.second);
-//        decoded.set_allocated_routepoints(t);
-//    }
-//    decoded.set_maxtime(out.MaxTime);
-//    decoded.set_userid(out.UserID);
-//    return decoded.SerializeAsString();
-//}
 
 std::string Client::Marshal(const DataOut &out) {
     if (out.UserID < 0) {
